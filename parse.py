@@ -142,15 +142,6 @@ def parseStatement():
     numLine, lex, tok = getSymb()
 
 
-    # try:
-    #   # перевірити синтаксичну коректність списку інструкцій IdentList1
-    #   parseIdentList1()
-    #
-    #   return True
-    # except SystemExit as e:
-    #   # Повідомити про факт виявлення помилки
-    #   print('Parser: Написати помилку №№№№ {0}'.format(e))
-
     # якщо токен - ідентифікатор
     # обробити інструкцію присвоювання
     if tok == 'id':
@@ -203,20 +194,11 @@ def parseStatement():
     return res
 
 
-# def parseIdentList1():
-#   indent = nextIndt()
-#   print(indent+'parseIdentList1():')
-#   while parseIndt1(): #для індент через ","
-#     pass
-#   # перед поверненням - зменшити відступ
-#   indent = predIndt()
-#   return True
-#
 
 def parseInp():
     # відступ збільшити
     indent = nextIndt()
-    print(indent + 'parseInp:')
+    print(indent + 'parseInp():')
 
     # встановити номер нової поточної лексеми
     if parseToken('gets', 'keyword'):
@@ -244,6 +226,23 @@ def parseInp():
     return res
 
 
+def parseDeclaration():
+    indent = nextIndt()
+    print(indent + 'parseDeclaration():')
+
+    # Разбираем идентификаторы с левой стороны присваивания
+    parseIdentList()
+
+    # Убедиться, что токен '=' правильно распарсен
+    parseToken('=', 'assign_op')
+
+    # Разбираем выражения с правой стороны присваивания
+    parseExpressionList()
+
+    indent = predIndt()
+    return True
+
+
 def parseAssign():
     # номер запису таблиці розбору
     global numRow
@@ -257,16 +256,22 @@ def parseAssign():
 
     # встановити номер нової поточної лексеми
     numRow += 1
-
+    numLine, lex, tok = getSymb()
     # print('\t'*5+'в рядку {0} - {1}'.format(numLine,(lex, tok)))
     # якщо була прочитана лексема - '='
-    if parseToken('=', 'assign_op'):
+    if lex == '=':
+        parseToken('=', 'assign_op')
         numLine, lex, tok = getSymb()
 
         if lex == 'gets' and tok == 'keyword':
             parseInp()
         else:
             parseExpression()
+        res = True
+
+    elif lex == ',':
+        parseToken(',', 'punct')
+        parseDeclaration()
         res = True
     else:
         res = False
@@ -568,22 +573,49 @@ def parseDigit():
     indent = predIndt()
     return res
 
-# Функция для разбора IdentList
 def parseIdentList():
-    indent = nextIndt()
-    print(indent + 'parseIdentList():')
+    global numRow
+    indent = nextIndt()  # Збільшуємо відступ для виводу
+    print(indent + 'parseIdentList():')  # Виводимо назву функції
 
-    # Разбираем первый идентификатор
+    # Розбираємо перший ідентифікатор
     parseIdent()
 
-    # Пока есть символы запятой, продолжаем разбор идентификаторов
-    while parseToken(',', 'punct'):
-        parseIdent()
+    # Поки є символи коми, продовжуємо розбір ідентифікаторів
+    while True:
+        numLine, lex, tok = getSymb()  # Отримуємо наступний токен
 
-    # уменьшить отступ перед возвратом
-    indent = predIndt()
-    return True
+        if tok == 'punct' and lex == ',':
+            parseToken(',', 'punct')  # Розбираємо кому
+            parseIdent()  # Розбираємо наступний ідентифікатор
+        else:
+            # Якщо токен не кома, виходимо з циклу
+            break
 
+    indent = predIndt()  # Зменшуємо відступ перед поверненням
+    return True  # Повертаємо True, якщо розбір пройшов успішно
+
+
+def parseExpressionList():
+    indent = nextIndt()  # Збільшуємо відступ для виводу
+    print(indent + 'parseExpressionList():')  # Виводимо назву функції
+
+    # Розбираємо перше вираження
+    parseExpression()
+
+    # Поки є символи коми, продовжуємо розбір виражень
+    while True:
+        numLine, lex, tok = getSymb()  # Отримуємо наступний токен
+
+        if tok == 'punct' and lex == ',':
+            parseToken(',', 'punct')  # Розбираємо кому
+            parseExpression()  # Розбираємо наступне вираження
+        else:
+            # Якщо токен не кома, виходимо з циклу
+            break
+
+    indent = predIndt()  # Зменшуємо відступ перед поверненням
+    return True  # Повертаємо True, якщо розбір пройшов успішно
 
 stepIndt = 2
 indt = 0  # або indt = 0
