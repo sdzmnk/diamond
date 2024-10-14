@@ -1,5 +1,7 @@
 # Program9-- to demonstrate +++ /// . )(various operators
 
+sum = id ** 1
+
 # Variable declaration
 x, y, z = -5.23, 10, 15
 result = 0
@@ -18,9 +20,10 @@ product = input * z
 is_equal = (x == y)
 is_greater = (z > input2)
 
-# Conditional if else statement
-if counter2 == 10
-puts "id"
+
+# Conditional if-else statement
+if counter2 > 10
+counter = x + 1
 elif counter1 == 11
  puts 2
  elif counter3 == 13
@@ -28,7 +31,6 @@ elif counter1 == 11
 else
  puts 3
 end
-
 
 # Conditional elif statement
 if is_greater

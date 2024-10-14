@@ -115,7 +115,6 @@ def failParse(str, tuple):
                                                                                                            expected))
         exit(3)
 
-
 # Функція для розбору за правилом для StatementList
 # StatementList = Statement  { Statement }
 # викликає функцію parseStatement() доти,
@@ -181,16 +180,6 @@ def parseStatement():
     indent = predIndt()
     return res
 
-
-# def parseIdentList1():
-#   indent = nextIndt()
-#   print(indent+'parseIdentList1():')
-#   while parseIndt1(): #для індент через ","
-#     pass
-#   # перед поверненням - зменшити відступ
-#   indent = predIndt()
-#   return True
-#
 
 def parseInp():
     # відступ збільшити
@@ -279,7 +268,6 @@ def parseAssign():
     return res
 
 
-
 def parseExpression():
     global numRow
     # відступ збільшити
@@ -292,7 +280,7 @@ def parseExpression():
     # розділені лексемами '+' або '-'
     while F:
         numLine, lex, tok = getSymb()
-        if tok in ('add_op'):
+        if tok in ('add_op', 'rel_op', 'mul_op', 'pow_op'):
             numRow += 1
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
             parseTerm()
@@ -365,6 +353,7 @@ def parseCaseBlock():
     # перед поверненням - зменшити відступ
     indent = predIndt()
     return res
+
 def parseDefaultBlock():
     global numRow
     indent = nextIndt()
@@ -379,7 +368,6 @@ def parseDefaultBlock():
         res = False
     indent = predIndt()
     return res
-
 
 def parseStatementListSwitch():
     global numRow
@@ -407,7 +395,6 @@ def parseStatementListSwitch():
 
     # Повернутися на один рівень у відступі
     indent = predIndt()
-
 
 def parseDigit():
     global numRow
@@ -467,10 +454,10 @@ def parseFactor():
     # третя альтернатива для Factor
     # якщо лексема - це відкриваюча дужка
     elif lex == '(':
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
         parseExpression()
-        parseToken(')', 'par_op')
-        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        parseToken(')', 'brackets_op')
     else:
         failParse('невідповідність у Expression.Factor',
                   (numLine, lex, tok, 'rel_op, int, float, id або \'(\' Expression \')\''))
@@ -492,7 +479,7 @@ def parseIf():
     if lex == 'if' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
-        parseBoolExpr()
+        parseExpression()
         parseStatement()  # Виконуємо парсинг блоку if
         #parseToken('elif', 'keyword')
         while True:
@@ -500,7 +487,7 @@ def parseIf():
             if lex == 'elif' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
                 numRow += 1
-                parseBoolExpr()  # Парсинг логічного виразу в elif
+                parseExpression() # Парсинг логічного виразу в elif
                 parseStatement()  # Парсинг блоку elif
             elif lex == 'else' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
@@ -528,7 +515,7 @@ def parseWhile():
     if lex == 'while' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
-        parseBoolExpr()
+        parseExpression()
         parseToken('do', 'keyword')
         parseStatementList()
         parseToken('end', 'keyword')
@@ -549,7 +536,7 @@ def parseUntil():
     if lex == 'until' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
-        parseBoolExpr()
+        parseExpression()
         parseToken('do', 'keyword')
         parseStatementList()
         parseToken('end', 'keyword')
@@ -620,7 +607,7 @@ def parseBoolExpr():
         numRow += 1
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
     else:
-        failParse('mismatch in BoolExpr', (numLine, lex, tok, 'relop'))
+        failParse('mismatch in BoolExpr', (numLine, lex, tok, 'rel_op'))
     parseExpression()
     # перед поверненням - зменшити відступ
     indent = predIndt()
