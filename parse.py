@@ -1,5 +1,3 @@
-from sre_parse import parse
-
 from diamond import lex
 from diamond import tableOfSymb
 
@@ -142,8 +140,6 @@ def parseStatement():
     numLine, lex, tok = getSymb()
 
 
-    # якщо токен - ідентифікатор
-    # обробити інструкцію присвоювання
     if tok == 'id':
         parseAssign()
         res = True
@@ -154,30 +150,22 @@ def parseStatement():
         parseIf()
         res = True
 
-        # elif (lex, tok) == ('elif','keyword'):
-    #     parseElif()
-    #     res = True
-
     elif (lex, tok) == ('for', 'keyword'):
       parseFor()
       res = True
 
-    # elif (lex, tok) == ('while','keyword'):
-    #     parseWhile()
-    #     res = True
+    elif (lex, tok) == ('while','keyword'):
+        parseWhile()
+        res = True
 
-    # elif (lex, tok) == ('switch', 'keyword'):
-    #     parseSwitch()
-    #     res = True
+    elif (lex, tok) == ('switch', 'keyword'):
+        parseSwitch()
+        res = True
 
     elif (lex, tok) == ('until', 'keyword'):
         parseUntil()
         res = True
 
-    # elif (lex, tok) == ('gets','keyword'):
-    #     parseInp()
-    #     res = True
-    #
     elif (lex, tok) == ('puts', 'keyword'):
         parseOut()
         res = True
@@ -194,6 +182,15 @@ def parseStatement():
     return res
 
 
+# def parseIdentList1():
+#   indent = nextIndt()
+#   print(indent+'parseIdentList1():')
+#   while parseIndt1(): #для індент через ","
+#     pass
+#   # перед поверненням - зменшити відступ
+#   indent = predIndt()
+#   return True
+#
 
 def parseInp():
     # відступ збільшити
@@ -207,6 +204,7 @@ def parseInp():
         numLine, lex, tok = getSymb()
         if lex == '.':
             parseToken('.', 'punct')
+            numLine, lex, tok = getSymb()
             if lex == 'to_i':
                 parseToken('to_i', 'keyword')
                 res = True
@@ -215,6 +213,7 @@ def parseInp():
                 parseToken('to_f', 'keyword')
                 res = True
             else:
+                numLine, lex, tok = getSymb()
                 failParse('невідповідність інструкцій', (numLine, lex, tok, 'to_i або to_f'))
                 res = False
         res = True
@@ -230,14 +229,14 @@ def parseDeclaration():
     indent = nextIndt()
     print(indent + 'parseDeclaration():')
 
-    # Разбираем идентификаторы с левой стороны присваивания
+    # Розбираємо ідентифікатори з лівого боку присвоєння
     parseIdentList()
 
-    # Убедиться, что токен '=' правильно распарсен
+    # Переконатися, що токен '=' правильно розібраний
     parseToken('=', 'assign_op')
 
-    # Разбираем выражения с правой стороны присваивания
-    parseExpressionList()
+    # Розбираємо вирази з правого боку присвоєння
+    parseExpressionListOrInpSplit()
 
     indent = predIndt()
     return True
@@ -280,6 +279,7 @@ def parseAssign():
     return res
 
 
+
 def parseExpression():
     global numRow
     # відступ збільшити
@@ -298,53 +298,6 @@ def parseExpression():
             parseTerm()
         else:
             F = False
-    # перед поверненням - зменшити відступ
-    indent = predIndt()
-    return True
-
-
-def parseFor():
-    global numRow
-    # відступ збільшити
-    indent = nextIndt()
-    numLine, lex, tok = getSymb()
-    if lex == 'for' and tok == 'keyword':
-        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-        numRow += 1
-        parseToken('id', 'id')
-        parseToken('in', 'keyword')
-        parseRange()
-        parseToken('do', 'keyword')
-        parseStatementList()
-        parseToken('end', 'keyword')
-        res = True
-    else:
-        res = False
-    # перед поверненням - зменшити відступ
-    indent = predIndt()
-    return res
-
-
-def parseRange():
-    global numRow
-    indent = nextIndt()
-    print(indent + 'parseRange():')
-
-    # Очікувати лексему '['
-    parseToken('[', 'range_op')
-
-    # Розбирати перше значення діапазону
-    parseExpression()
-
-    # Очікувати лексему '..' для визначення діапазону
-    parseToken('..', 'range_op')
-
-    # Розбирати друге значення діапазону
-    parseExpression()
-
-    # Очікувати лексему ']'
-    parseToken(']', 'range_op')
-
     # перед поверненням - зменшити відступ
     indent = predIndt()
     return True
@@ -374,6 +327,106 @@ def parseIdent():
     indent = predIndt()
     return res
 
+def parseSwitch():
+    global numRow
+    # відступ збільшити
+    indent = nextIndt()
+    numLine, lex, tok = getSymb()
+    if lex == 'switch' and tok == 'keyword':
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        numRow += 1
+        parseDigit() or parseIdent()
+        parseToken('do', 'keyword')
+        while parseCaseBlock():
+            pass  # Виконуємо парсинг блоків case, поки це можливо
+        parseDefaultBlock()
+        parseToken('end', 'keyword')
+        res = True
+    else:
+        res = False
+    # перед поверненням - зменшити відступ
+    indent = predIndt()
+    return res
+
+def parseCaseBlock():
+    global numRow
+    # відступ збільшити
+    indent = nextIndt()
+    numLine, lex, tok = getSymb()
+    if lex == 'case' and tok == 'keyword':
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        numRow += 1
+        parseDigit() or parseIdent()
+        parseToken(':', 'punct')
+        parseStatementListSwitch()
+        res = True
+    else:
+        res = False
+    # перед поверненням - зменшити відступ
+    indent = predIndt()
+    return res
+def parseDefaultBlock():
+    global numRow
+    indent = nextIndt()
+    numLine, lex, tok = getSymb()
+    if lex == 'default' and tok == 'keyword':
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        numRow += 1
+        parseToken(':', 'punct')
+        parseStatementList()
+        res = True
+    else:
+        res = False
+    indent = predIndt()
+    return res
+
+
+def parseStatementListSwitch():
+    global numRow
+    indent = nextIndt()  # Збільшити відступ
+    while True:
+        numLine, lex, tok = getSymb()
+        if tok == 'keyword':
+            if lex == 'case':
+                # Якщо знайдено 'case', викликати parseCaseBlock
+                if not parseCaseBlock():
+                    print('Parser ERROR: Не вдалося обробити блок case.')
+                    exit(2001)  # Код помилки для блоків case
+            elif lex == 'default':
+                # Якщо знайдено 'default', викликати parseDefaultBlock
+                if not parseDefaultBlock():
+                    print('Parser ERROR: Не вдалося обробити блок default.')
+                    exit(2002)  # Код помилки для блоків default
+            else:
+                # Тут можуть бути інші ключові слова чи оператори
+                if not parseStatement():  # Якщо це не case чи default, викликати парсинг звичайних операторів
+                    break  # Вийти з циклу, якщо парсинг не вдався
+        else:
+            # Якщо токен не є ключовим словом, вийти з циклу
+            break
+
+    # Повернутися на один рівень у відступі
+    indent = predIndt()
+
+
+def parseDigit():
+    global numRow
+    indent = nextIndt()
+    print(indent + 'parseDigit():')
+
+    # Отримуємо поточну лексему
+    numLine, lex, tok = getSymb()
+
+    # Перевіряємо, чи є лексема числом
+    if tok == 'int':
+        numRow += 1  # Переходимо до наступної лексеми
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        res = True
+    else:
+        res = False  # Повертаємо False, якщо це не число
+
+    indent = predIndt()
+    return res
 
 def parseTerm():
     global numRow
@@ -429,23 +482,39 @@ def parseFactor():
 # розбір інструкції розгалуження за правилом
 # IfStatement = if BoolExpr then Statement else Statement endif
 # функція названа parseIf() замість parseIfStatement()
+
 def parseIf():
     global numRow
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
+
     if lex == 'if' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
         parseBoolExpr()
-        parseToken('then', 'keyword')
-        parseStatement()
-        parseToken('else', 'keyword')
-        parseStatement()
-        parseToken('endif', 'keyword')
+        parseStatement()  # Виконуємо парсинг блоку if
+        #parseToken('elif', 'keyword')
+        while True:
+            numLine, lex, tok = getSymb()
+            if lex == 'elif' and tok == 'keyword':
+                print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+                numRow += 1
+                parseBoolExpr()  # Парсинг логічного виразу в elif
+                parseStatement()  # Парсинг блоку elif
+            elif lex == 'else' and tok == 'keyword':
+                print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+                numRow += 1
+                parseStatement()  # Парсинг блоку else
+                break  # Вийти з циклу після обробки else
+            else:
+                # Якщо токен не elif або else, повертаємося до завершення if
+                break
+        parseToken('end', 'keyword')
         res = True
     else:
         res = False
+
     # перед поверненням - зменшити відступ
     indent = predIndt()
     return res
@@ -491,6 +560,51 @@ def parseUntil():
     indent = predIndt()
     return res
 
+def parseFor():
+    global numRow
+    # відступ збільшити
+    indent = nextIndt()
+    numLine, lex, tok = getSymb()
+    if lex == 'for' and tok == 'keyword':
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        numRow += 1
+        parseIdent()
+        parseToken('in', 'keyword')
+        parseRange()
+        parseToken('do', 'keyword')
+        parseStatementList()
+        parseToken('end', 'keyword')
+        res = True
+    else:
+        res = False
+    # перед поверненням - зменшити відступ
+    indent = predIndt()
+    return res
+
+
+def parseRange():
+    global numRow
+    indent = nextIndt()
+    print(indent + 'parseRange():')
+
+    # Очікувати лексему '['
+    parseToken('[', 'brackets_op')
+
+    # Розбирати перше значення діапазону
+    parseExpression()
+
+    # Очікувати лексему '..' для визначення діапазону
+    parseToken('..', 'range_op')
+
+    # Розбирати друге значення діапазону
+    parseExpression()
+
+    # Очікувати лексему ']'
+    parseToken(']', 'brackets_op')
+
+    # перед поверненням - зменшити відступ
+    indent = predIndt()
+    return True
 
 # розбір логічного виразу за правиллом
 # BoolExpr = Expression ('='|'<='|'>='|'<'|'>'|'<>') Expression
@@ -511,9 +625,10 @@ def parseBoolExpr():
     # перед поверненням - зменшити відступ
     indent = predIndt()
     return True
+
 def parseOut():
     global numRow
-    # збільшити відступ
+    # Збільшити відступ
     indent = nextIndt()
     print(indent + 'parseOut():')
 
@@ -526,23 +641,28 @@ def parseOut():
         print(indent + 'в рядку {0} токен {1}'.format(numLine, (lex, tok)))
         res = False
 
-        # Спочатку перевіряємо, чи йде після 'puts' число без лапок
-        if parseDigit():
-            print(indent + 'parseOut(): Коректний синтаксис (число без лапок)')
+        # Перевіряємо, чи наступний токен - число
+        next_numLine, next_lex, next_tok = getSymb()  # Отримуємо наступний токен
+
+        if next_tok == 'int':
+            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
             res = True
-        # Якщо це не число, перевіряємо, чи є лапки
-        elif parseToken('"', 'punct'):
+            numRow += 1  # Переходимо до наступної лексеми
+
+        elif next_tok == 'punct' and next_lex == '"':
+            parseToken(next_lex, next_tok)
             # Перевіряємо на ідентифікатор всередині лапок
             if parseIdent():
                 # Перевіряємо на закриваючі лапки
                 if parseToken('"', 'punct'):
                     res = True
-                else:
-                    failParse('Очікувалась закриваюча лапка', (numLine, lex, tok, '"'))
-                    res = False
-            else:
-                failParse('Очікувався ідентифікатор в лапках', (numLine, lex, tok))
-                res = False
+        elif next_tok == 'punct':
+            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
+            res = True
+            numRow += 1  # Переходимо до наступної лексеми
+        else:
+            failParse('Невідповідність інструкцій, очікувалось число або лапки', (numLine, lex, tok))
+
     else:
         failParse('Невідповідність інструкцій, очікувалось "puts"', (numLine, lex, tok, 'puts'))
         res = False
@@ -551,27 +671,6 @@ def parseOut():
     indent = predIndt()
     return res
 
-
-
-
-def parseDigit():
-    global numRow
-    indent = nextIndt()
-    print(indent + 'parseDigit():')
-
-    # Отримуємо поточну лексему
-    numLine, lex, tok = getSymb()
-
-    # Перевіряємо, чи є лексема числом
-    if tok == 'int':
-        numRow += 1  # Переходимо до наступної лексеми
-        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-        res = True
-    else:
-        res = False  # Повертаємо False, якщо це не число
-
-    indent = predIndt()
-    return res
 
 def parseIdentList():
     global numRow
@@ -617,6 +716,35 @@ def parseExpressionList():
     indent = predIndt()  # Зменшуємо відступ перед поверненням
     return True  # Повертаємо True, якщо розбір пройшов успішно
 
+
+
+def parseExpressionListOrInpSplit():
+    indent = nextIndt()
+    print(indent + 'parseExpressionOrInpSplit():')
+
+    # Отримуємо поточний токен
+    numLine, lex, tok = getSymb()
+
+    if tok == 'id':
+        parseIdent()
+        parseToken('.', 'punct')  # Розбираємо '.'
+        parseToken('split', 'keyword')  # Розбираємо 'split'
+        # Обробка завершена, присвоюємо результат
+        res = True
+    elif lex == 'gets':
+        parseToken('gets', 'keyword')  # Розбираємо '.'
+        parseToken('.', 'punct')  # Розбираємо '.'
+        parseToken('split', 'keyword')  # Розбираємо 'split'
+        res = True
+    else:
+        # В іншому випадку обробляємо як звичайний вираз
+        parseExpressionList()
+        res = True
+
+    indent = predIndt()
+    return res
+
+
 stepIndt = 2
 indt = 0  # або indt = 0
 
@@ -636,4 +764,5 @@ def predIndt():
 # запуск парсера
 if FSuccess == ('Lexer', True):
     parseProgram()
+
 

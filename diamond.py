@@ -61,35 +61,39 @@ f.close()
 # або символа нового рядка
 sourceCode+=' '
 
-# FSuccess - ознака успішності/неуспішності розбору
-FSuccess = ('Lexer',False)
-
 lenCode = len(sourceCode) - 1  # номер останнього символа у файлі з кодом програми
 numLine = 1  # лексичний аналіз починаємо з першого рядка
 numChar = -1  # з першого символа (в Python'і нумерація - з 0)
 char = ''  # ще не брали жодного символа
 lexeme = ''  # ще не починали розпізнавати лексеми
 
+FSuccess = ('Lexer',True)
+
 
 def lex():
     global state, numLine, char, lexeme, numChar, FSuccess
-    try:
-        while numChar < lenCode:
-            char = nextChar()  # прочитати наступний символ
-            classCh = classOfChar(char)  # до якого класу належить
-            state = nextState(state, classCh)  # обчислити наступний стан
-            if (is_final(state)):  # якщо стан заключний
-                processing()  # виконати семантичні процедури
-            elif state == initState:
-                lexeme = ''  # якщо стан НЕ заключний, а стартовий - нова лексема
-            else:
-                lexeme += char  # якщо стан НЕ закл. і не стартовий - додати символ до лексеми
+    while numChar < lenCode:
+        char = nextChar()  # прочитати наступний символ
+        classCh = classOfChar(char)  # визначити клас символу
+        state = nextState(state, classCh)  # обчислити наступний стан
+
+        if is_final(state):  # якщо стан фінальний
+            processing()  # виконати семантичні процедури
+
+            if state in Ferror:  # якщо це стан помилки
+                FSuccess = ('Lexer', False)  # завершення з помилкою
+                break  # завершити цикл при помилці
+        elif state == initState:
+            lexeme = ''  # скидання лексеми при стартовому стані
+        else:
+            lexeme += char  # додати символ до лексеми
+
+    if FSuccess == ('Lexer', True):
         print('Lexer: Лексичний аналіз завершено успішно')
-        FSuccess = ('Lexer', True)
-        return FSuccess
-    except SystemExit as e:
-        # Повідомити про факт виявлення помилки
-        print('Lexer: Аварійне завершення програми з кодом {0}'.format(e))
+    else:
+        print('Lexer: Лексичний аналіз завершено аварійно')
+
+    return FSuccess
 
 
 #Мой код
@@ -239,11 +243,11 @@ def indexIdConst(state, lexeme):
 
 
 # запуск лексичного аналізатора
-lex()
-
-# Таблиці: розбору, ідентифікаторів та констант
-print('-' * 30)
-print('tableOfSymb:{0}'.format(tableOfSymb))
-print('tableOfId:{0}'.format(tableOfId))
-print('tableOfConst:{0}'.format(tableOfConst))
+# lex()
+#
+# # Таблиці: розбору, ідентифікаторів та констант
+# print('-' * 30)
+# print('tableOfSymb:{0}'.format(tableOfSymb))
+# print('tableOfId:{0}'.format(tableOfId))
+# print('tableOfConst:{0}'.format(tableOfConst))
 
