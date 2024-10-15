@@ -17,7 +17,7 @@ print(('len_tableOfSymb', len_tableOfSymb))
 
 
 # Функція для розбору за правилом
-# Program = program StatementList end=
+# Program = {Comment | StatementList} end
 # читає таблицю розбору tableOfSymb
 def parseProgram():
     try:
@@ -643,7 +643,8 @@ def parseOut():
                 # Перевіряємо на закриваючі лапки
                 if parseToken('"', 'punct'):
                     res = True
-        elif next_tok == 'punct':
+        elif (next_tok == 'punct' or next_tok == 'add_op' or next_tok == 'mult_op'
+              or next_tok == 'rel_op' or next_tok == 'assign_op' or next_tok == 'sharp' or next_tok == 'brackets_op'):
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
             res = True
             numRow += 1  # Переходимо до наступної лексеми
