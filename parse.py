@@ -454,9 +454,15 @@ def parseFactor():
 
     # перша і друга альтернативи для Factor
     # якщо лексема - це константа або ідентифікатор
-    if tok in ('int', 'float', 'id'):
+    if tok in ('int', 'float', 'id', 'add_op'):
         numRow += 1
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        numLine, lex, tok = getSymb()
+        if lex == '(':
+            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+            numRow += 1
+            parseExpression()
+            parseToken(')', 'brackets_op')
 
     # третя альтернатива для Factor
     # якщо лексема - це відкриваюча дужка
