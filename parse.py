@@ -168,6 +168,13 @@ def parseStatement():
     elif (lex, tok) == ('puts', 'keyword'):
         parseOut()
         res = True
+
+    elif (lex, tok) == ('elif', 'keyword'):
+        res = False
+
+    elif (lex, tok) == ('else', 'keyword'):
+        res = False
+
     # Перевірка на ключове слово 'end'
     elif (lex, tok) == ('end', 'keyword'):
         res = False  # Повертаємо False, щоб завершити список інструкцій
@@ -479,20 +486,20 @@ def parseIf():
     if lex == 'if' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
-        parseExpression()
-        parseStatement()  # Виконуємо парсинг блоку if
+        parseBoolExpr()
+        parseStatementList()  # Виконуємо парсинг блоку if
         #parseToken('elif', 'keyword')
         while True:
             numLine, lex, tok = getSymb()
             if lex == 'elif' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
                 numRow += 1
-                parseExpression() # Парсинг логічного виразу в elif
-                parseStatement()  # Парсинг блоку elif
+                parseBoolExpr() # Парсинг логічного виразу в elif
+                parseStatementList()  # Парсинг блоку elif
             elif lex == 'else' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
                 numRow += 1
-                parseStatement()  # Парсинг блоку else
+                parseStatementList()  # Парсинг блоку else
                 break  # Вийти з циклу після обробки else
             else:
                 # Якщо токен не elif або else, повертаємося до завершення if
@@ -536,7 +543,7 @@ def parseUntil():
     if lex == 'until' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
-        parseExpression()
+        parseBoolExpr()
         parseToken('do', 'keyword')
         parseStatementList()
         parseToken('end', 'keyword')
@@ -599,16 +606,21 @@ def parseBoolExpr():
     global numRow
     # відступ збільшити
     indent = nextIndt()
-
-    print(indent + 'parseBoolExpr()')
-    parseExpression()
+    print(indent + 'parseBoolExpr():')
     numLine, lex, tok = getSymb()
-    if tok in ('rel_op'):
-        numRow += 1
-        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-    else:
-        failParse('mismatch in BoolExpr', (numLine, lex, tok, 'rel_op'))
-    parseExpression()
+    parseTerm()
+    F = True
+    # продовжувати розбирати Доданки (Term)
+    # розділені лексемами '+' або '-'
+    while F:
+        numLine, lex, tok = getSymb()
+        if tok in ('rel_op'):
+            numRow += 1
+            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+            parseTerm()
+        else:
+            failParse('mismatch in BoolExpr', (numLine, lex, tok, 'rel_op'))
+            F = False
     # перед поверненням - зменшити відступ
     indent = predIndt()
     return True
