@@ -529,7 +529,7 @@ def parseWhile():
     if lex == 'while' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
-        parseExpression()
+        parseBoolExpr()
         parseToken('do', 'keyword')
         parseStatementList()
         parseToken('end', 'keyword')

@@ -22,12 +22,15 @@ is_greater = (z > input2)
 
 
 # Conditional if-else statement
-if counter2 > 10
-counter = x + 1
+if counter2 < 10
+    counter = x + 1
+    if counter2 < 10
+    counter = x + 1
+    end
 elif counter1 == 11
- puts 2
- elif counter3 == 13
- puts 34
+    puts 2
+elif counter3 == 13
+    puts 34
 else
  puts 3
 end
