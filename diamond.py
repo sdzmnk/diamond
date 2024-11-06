@@ -8,10 +8,10 @@ tokenTable = {
     ':': 'punct', '#': 'sharp', ' ': 'ws', '\t': 'ws', '\n': 'eol', '\r\n': 'eol',
     'until': 'keyword', 'switch': 'keyword', 'case': 'keyword', 'elif': 'keyword', 'default': 'keyword',
     'split': 'keyword', 'do': 'keyword', 'else': 'keyword', 'in': 'keyword', 'while': 'keyword',
-    ']': 'brackets_op', '[': 'brackets_op', '..': 'range_op'
+    ']': 'brackets_op', '[': 'brackets_op', '..': 'range_op', '^': 'type_var', 'begin': 'keyword', 'int': 'int', 'float': 'float',
 }
 # Решту токенів визначаємо не за лексемою, а за заключним станом
-tokStateTable = {2: 'id', 5: 'float', 6: 'int', 9: 'rel_op or assign_op', 11: 'mult_op', 24: 'comment', 28:'dot', 29:'add_op'}
+tokStateTable = {2: 'id', 5: 'float', 6: 'int', 9: 'rel_op or assign_op', 11: 'mult_op', 24: 'comment', 28:'dot', 29:'add_op', 41:'type_var'}
 
 # Діаграма станів
 #               Q                                                                                                               q0          F
@@ -37,12 +37,13 @@ stf = {(0, 'Letter'): 1, (1, 'Letter'): 1, (1, 'Digit'): 1, (1, 'underline'): 1,
        (0, 'eol'): 25,
        (0, 'dot'): 26, (26, 'dot'): 27, (26, 'Letter'): 30,
                     (27, 'other'): 28, (26, 'other'): 101, (30, 'other'): 101,
+        (0, '^'): 40, (40, 'other'): 41,
        (0, 'other'): 101,
        (0, 'ws'): 0,
        }
 
 initState = 0  # q0 - стартовий стан
-F = {2, 5, 6, 8, 9, 11, 12, 13, 20, 24, 25, 27, 28, 29, 30, 101, 102}
+F = {2, 5, 6, 8, 9, 11, 12, 13, 20, 24, 25, 27, 28, 29, 30, 101, 102, 41}
 Fstar = {2, 5, 6, 9, 11, 17, 18, 29, 30}  # зірочка
 Ferror = {101, 102}  # обробка помилок
 
@@ -119,6 +120,15 @@ def processing():
     numChar=putCharBack(numChar) # зірочка
     state=initState
 
+  if state == 41:  # Оператор діапазону
+      lexeme += char
+      token = 'type_var'
+      lexeme = lexeme.strip()
+      print(numLine, "  ", lexeme, "  ", token)
+      tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, '')
+      lexeme = ''
+      state = initState
+
   if state == 27:  # Оператор діапазону
       lexeme += char
       token = 'range_op'
@@ -149,7 +159,6 @@ def processing():
       tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, '')
       lexeme = ''
       state = initState
-
 
   if state in (29, 30):  # punct (стан пунктуації)
       token = getToken(state, lexeme)
@@ -207,11 +216,15 @@ def classOfChar(char):
         res = "Digit"
     elif char in " ":
         res = "ws"
+    elif char in "int":
+        res = "int"
+    elif char in "float":
+        res = "float"
     elif char in "_":
         res = "underline"
     elif char in "\n":
         res = "eol"
-    elif char in ",;:<>!+-=*/()[]#\"":
+    elif char in "^,;:<>!+-=*/()[]#\"":
         res = char
 
     else:

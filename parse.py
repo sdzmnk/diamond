@@ -14,23 +14,62 @@ numRow = 1
 # він же - номер останнього запису
 len_tableOfSymb = len(tableOfSymb)
 print(('len_tableOfSymb', len_tableOfSymb))
-
+tableOfVar = {}
 
 # Функція для розбору за правилом
 # Program = {Comment | StatementList} end
 # читає таблицю розбору tableOfSymb
 def parseProgram():
     try:
+        parseDeclarList()
+        parseToken('begin', 'keyword')
         # Перевіряємо синтаксичну коректність списку інструкцій
         parseStatementList()
         # Очікуємо ключове слово "end" в кінці
         parseToken('end', 'keyword')
         # повідомити про синтаксичну коректність програми
         print('Parser: Синтаксичний аналіз завершився успішно')
+        print('tableOfVar:{0}'.format(tableOfVar))
         return True
     except SystemExit as e:
         # Повідомити про факт виявлення помилки
         print('Parser: Аварійне завершення програми з кодом {0}'.format(e))
+
+
+def parseDeclarList():
+    global numRow
+    numLine, lex, tok = getSymb()
+
+    while (lex, tok) != ('begin', 'keyword'):  # Доки не зустріли 'begin'
+        if tok == 'id':  # Якщо токен - це ідентифікатор
+            numRow += 1
+            parseToken('^', 'type_var')  # Очікуємо знак типу змінної
+            numLineT, lexT, tokT = getSymb()
+            numRow += 1
+            if tokT in ('int', 'float'):  # Якщо тип змінної - int або float
+                procTableOfVar(numLine, lex, tokT, 'undefined')  # Додаємо змінну в таблицю
+            else:
+                failParse('неприпустимий тип', (numLineT, lexT, tokT))  # Помилка: неправильний тип
+        else:
+            failParse('очікувався ідентифікатор', (numLine, lex, tok))  # Помилка: очікувався ідентифікатор
+
+        numLine, lex, tok = getSymb()  # Читання наступного токену
+
+
+def procTableOfVar(numLine, lexeme, type, value):
+    indx = tableOfVar.get(lexeme)  # Перевірка на наявність змінної в таблиці
+    if indx is None:  # Якщо змінна ще не була оголошена
+        indx = len(tableOfVar) + 1  # Додаємо її в таблицю
+        tableOfVar[lexeme] = (indx, type, value)
+    else:
+        failParse('повторне оголошення змінної', (numLine, lexeme, type, value))  # Якщо змінна вже оголошена
+
+
+def getTypeVar(id):
+    try:
+        return tableOfVar[id][1]  # Повертаємо тип змінної
+    except KeyError:
+        return 'undeclared_variable'  # Якщо змінна не знайдена, повертаємо 'undeclared_variable'
 
 
 # Функція перевіряє, чи у поточному рядку таблиці розбору зустрілась вказана лексема lexeme з токеном token параметр indent - відступ при виведенні у консоль
@@ -252,8 +291,7 @@ def parseAssign():
     # встановити номер нової поточної лексеми
     numRow += 1
     numLine, lex, tok = getSymb()
-    # print('\t'*5+'в рядку {0} - {1}'.format(numLine,(lex, tok)))
-    # якщо була прочитана лексема - '='
+
     if lex == '=':
         parseToken('=', 'assign_op')
         numLine, lex, tok = getSymb()
@@ -351,6 +389,7 @@ def parseCaseBlock():
     if lex == 'case' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
+        #getIdent()
         parseDigit() or parseIdent()
         parseToken(':', 'punct')
         parseStatementListSwitch()
