@@ -1,4 +1,5 @@
-a ^ int
+a ^ intt
+
 b ^ float
 begin
 a = 5

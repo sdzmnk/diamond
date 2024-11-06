@@ -111,6 +111,7 @@ def processing():
       index=indexIdConst(state,lexeme)
       # print('{0:<3d} {1:<10s} {2:<10s} {3:<5d} '.format(numLine,lexeme,token,index))
       print(numLine, "  ",  lexeme,  "  ", token, "  ", index)
+
       tableOfSymb[len(tableOfSymb)+1] = (numLine,lexeme,token,index)
     else: # якщо keyword
       # print('{0:<3d} {1:<10s} {2:<10s} '.format(numLine,lexeme,token))

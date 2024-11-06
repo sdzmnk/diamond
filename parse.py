@@ -22,6 +22,7 @@ tableOfVar = {}
 def parseProgram():
     try:
         parseDeclarList()
+        print('tableOfVar:{0}'.format(tableOfVar))
         parseToken('begin', 'keyword')
         # Перевіряємо синтаксичну коректність списку інструкцій
         parseStatementList()
@@ -29,7 +30,7 @@ def parseProgram():
         parseToken('end', 'keyword')
         # повідомити про синтаксичну коректність програми
         print('Parser: Синтаксичний аналіз завершився успішно')
-        print('tableOfVar:{0}'.format(tableOfVar))
+
         return True
     except SystemExit as e:
         # Повідомити про факт виявлення помилки
@@ -46,7 +47,7 @@ def parseDeclarList():
             parseToken('^', 'type_var')  # Очікуємо знак типу змінної
             numLineT, lexT, tokT = getSymb()
             numRow += 1
-            if tokT in ('int', 'float'):  # Якщо тип змінної - int або float
+            if lexT in ('int', 'float'):  # Якщо тип змінної - int або float
                 procTableOfVar(numLine, lex, tokT, 'undefined')  # Додаємо змінну в таблицю
             else:
                 failParse('неприпустимий тип', (numLineT, lexT, tokT))  # Помилка: неправильний тип
@@ -63,7 +64,6 @@ def procTableOfVar(numLine, lexeme, type, value):
         tableOfVar[lexeme] = (indx, type, value)
     else:
         failParse('повторне оголошення змінної', (numLine, lexeme, type, value))  # Якщо змінна вже оголошена
-
 
 def getTypeVar(id):
     try:
@@ -127,6 +127,17 @@ def failParse(str, tuple):
         print(
             'Parser ERROR: \n\t Неочікуваний кінець програми - в таблиці символів (розбору) немає запису з номером {1}. \n\t Очікувалось - {0}'.format(
                 (lexeme, token), numRow))
+        exit(1001)
+    if str == 'неприпустимий тип':
+        (numLine, lexeme, token) = tuple
+        print(
+            f'Parser ERROR: \n\t Неприпустимий тип - в таблиці символів (розбору) немає запису з номером {numLine}.')
+        exit(1001)
+
+    if str == 'повторне оголошення змінної':
+        (numLine, lexeme, type, value) = tuple
+        print(
+            f'Parser ERROR: \n\t Повторне оголошення змінної в рядку {numLine}: ({lexeme}, {type}) вже існує в таблиці символів.')
         exit(1001)
     if str == 'getSymb(): неочікуваний кінець програми':
         numRow = tuple
