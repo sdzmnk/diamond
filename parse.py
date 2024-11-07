@@ -1,4 +1,4 @@
-from diamond import lex
+from diamond import lex, tableOfConst
 from diamond import tableOfSymb
 
 FSuccess = lex()
@@ -22,15 +22,14 @@ tableOfVar = {}
 def parseProgram():
     try:
         parseDeclarList()
-        print('tableOfVar:{0}'.format(tableOfVar))
         parseToken('begin', 'keyword')
         # Перевіряємо синтаксичну коректність списку інструкцій
         parseStatementList()
         # Очікуємо ключове слово "end" в кінці
-        parseToken('end', 'keyword')
+        parseToken('finish', 'keyword')
         # повідомити про синтаксичну коректність програми
         print('Parser: Синтаксичний аналіз завершився успішно')
-
+        print('tableOfVar:{0}'.format(tableOfVar))
         return True
     except SystemExit as e:
         # Повідомити про факт виявлення помилки
@@ -57,7 +56,8 @@ def parseDeclarList():
         numLine, lex, tok = getSymb()  # Читання наступного токену
 
 
-def procTableOfVar(numLine, lexeme, type, value):
+
+def procTableOfVar(numLine, lexeme, type, value='undefined'):
     indx = tableOfVar.get(lexeme)  # Перевірка на наявність змінної в таблиці
     if indx is None:  # Якщо змінна ще не була оголошена
         indx = len(tableOfVar) + 1  # Додаємо її в таблицю
@@ -65,12 +65,50 @@ def procTableOfVar(numLine, lexeme, type, value):
     else:
         failParse('повторне оголошення змінної', (numLine, lexeme, type, value))  # Якщо змінна вже оголошена
 
+
 def getTypeVar(id):
     try:
         return tableOfVar[id][1]  # Повертаємо тип змінної
     except KeyError:
         return 'undeclared_variable'  # Якщо змінна не знайдена, повертаємо 'undeclared_variable'
 
+
+def isInitVar(id):
+    try:
+        # Перевірка на наявність змінної в таблиці
+        if tableOfVar[id][2] == 'undefined':  # Якщо змінна має значення "undefined"
+            # Змінюємо статус на "assigned"
+            tableOfVar[id] = (tableOfVar[id][0], tableOfVar[id][1], 'assigned')
+            return True
+        elif tableOfVar[id][2] == 'assigned':
+            return True
+        else:
+            return False
+    except KeyError:
+        return 'undeclared_variable'
+
+
+def getTypeConst(literal):
+    # tableOfConst - словник {literal:(indx,type)}
+    return tableOfConst[literal][1]
+
+def getTypeOp(lType,op,rType):
+    # типи збiгаються?
+    typesAreSame = lType == rType
+    # типи арифметичнi?
+    typesArithm = lType in ('int','float') and rType in ('int','float')
+
+    if typesAreSame and typesArithm and op in '+-*/' : typeRes = lType
+
+    elif typesAreSame and typesArithm and op in ('<','<=','>','>=','==','!='):
+        typeRes = 'bool'
+
+    elif typesAreSame and op in ('='):
+        typeRes = 'void'
+
+    else: typeRes = 'type_error'
+
+    return typeRes
 
 # Функція перевіряє, чи у поточному рядку таблиці розбору зустрілась вказана лексема lexeme з токеном token параметр indent - відступ при виведенні у консоль
 def parseToken(lexeme, token):
@@ -133,6 +171,11 @@ def failParse(str, tuple):
         print(
             f'Parser ERROR: \n\t Неприпустимий тип - в таблиці символів (розбору) немає запису з номером {numLine}.')
         exit(1001)
+    if str == 'використання неоголошеної змінної':
+        (numLine, lexeme, tok) = tuple
+        print(
+            f'Parser ERROR: \n\t Використання неоголошеної змінної -  в рядку {numLine}: ({lexeme}, {tok}).')
+        exit(1001)
 
     if str == 'повторне оголошення змінної':
         (numLine, lexeme, type, value) = tuple
@@ -164,20 +207,44 @@ def failParse(str, tuple):
                                                                                                            tok,
                                                                                                            expected))
         exit(3)
+    elif str == 'невідповідність типів операндів':
+        (numLine, lexeme1, type1, lexeme2, type2) = tuple
+        print(
+            f'Parser ERROR: \n\t Невідповідність типів операндів в рядку {numLine}: ({lexeme1}, {type1}) і ({lexeme2}, {type2}) не можуть бути використані разом.')
+        exit(4)
+    elif str == 'невідповідність типів операндів для присвоювання':
+        (numLine, lex, lType, rType) = tuple
+        print(
+            f'Parser ERROR: \n\t Невідповідність типів операндів для присвоювання в рядку {numLine}: змінна типу {lType} не може бути присвоєна значенню типу {rType}.')
+        exit(1004)
 
 # Функція для розбору за правилом для StatementList
 # StatementList = Statement  { Statement }
 # викликає функцію parseStatement() доти,
 # доки parseStatement() повертає True
 def parseStatementList():
-    # відступ збільшити
+    # Збільшуємо відступ
     indent = nextIndt()
     print(indent + 'parseStatementList():')
-    while parseStatement():
-        pass
-    # перед поверненням - зменшити відступ
+
+    while True:
+        # Отримуємо поточну лексему, щоб перевірити, чи досягли кінця
+        numLine, lex, tok = getSymb()
+
+        # Перевіряємо наявність ключового слова 'finish' для завершення списку інструкцій
+        if (lex, tok) == ('finish', 'keyword'):
+            break
+
+        # Обробка інструкції
+        resType, sucParse = parseStatement()
+
+        # Якщо інструкцію не було оброблено, завершуємо цикл
+        if not sucParse:
+            break
+
+    # Зменшуємо відступ перед поверненням
     indent = predIndt()
-    return True
+    return resType
 
 
 def parseStatement():
@@ -188,35 +255,34 @@ def parseStatement():
     # прочитаємо поточну лексему в таблиці розбору
     numLine, lex, tok = getSymb()
 
-
     if tok == 'id':
-        parseAssign()
+        resType = parseAssign()
         res = True
 
     # якщо лексема - ключове слово 'if'
     # обробити інструкцію розгалуження
     elif (lex, tok) == ('if', 'keyword'):
-        parseIf()
+        resType = parseIf()
         res = True
 
     elif (lex, tok) == ('for', 'keyword'):
-      parseFor()
+      resType = parseFor()
       res = True
 
     elif (lex, tok) == ('while','keyword'):
-        parseWhile()
+        resType = parseWhile()
         res = True
 
     elif (lex, tok) == ('switch', 'keyword'):
-        parseSwitch()
+        resType = parseSwitch()
         res = True
 
     elif (lex, tok) == ('until', 'keyword'):
-        parseUntil()
+        resType = parseUntil()
         res = True
 
     elif (lex, tok) == ('puts', 'keyword'):
-        parseOut()
+        resType = parseOut()
         res = True
 
     elif (lex, tok) == ('elif', 'keyword'):
@@ -228,6 +294,8 @@ def parseStatement():
     # Перевірка на ключове слово 'end'
     elif (lex, tok) == ('end', 'keyword'):
         res = False  # Повертаємо False, щоб завершити список інструкцій
+    elif (lex, tok) == ('finish', 'keyword'):
+        res = False  # Повертаємо False, щоб завершити список інструкцій
     else:
         # жодна з інструкцій не відповідає
         # поточній лексемі у таблиці розбору,
@@ -235,7 +303,7 @@ def parseStatement():
         res = False
     # перед поверненням - зменшити відступ
     indent = predIndt()
-    return res
+    return resType,res
 
 
 def parseInp():
@@ -294,34 +362,40 @@ def parseAssign():
     # відступ збільшити
     indent = nextIndt()
     print(indent + 'parseAssign():')
-
     # взяти поточну лексему
     numLine, lex, tok = getSymb()
     print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-
     # встановити номер нової поточної лексеми
     numRow += 1
-    numLine, lex, tok = getSymb()
+    numLineT, lexT, tokT = getSymb()
+    lType = getTypeVar(lex)
 
-    if lex == '=':
+    if lType == 'undeclared_variable':
+        failParse('використання неоголошеної змінної', (numLine, lex, tok))
+    isInitVar(lex)
+    # Перевірка на ініціалізацію змінної перед присвоєнням
+    # if not isInitVar(lex):
+    #     failParse('присвоєння неініціалізованої змінної', (numLine, lex, tok))
+
+    if lexT == '=':
         parseToken('=', 'assign_op')
         numLine, lex, tok = getSymb()
-
-        if lex == 'gets' and tok == 'keyword':
-            parseInp()
-        else:
-            parseExpression()
+        rType = parseExpression()
+        resType = getTypeOp(lType, '=', rType)
+        if resType == 'type_error':
+            failParse(resType, (numLine, lex,))
         res = True
-
     elif lex == ',':
         parseToken(',', 'punct')
         parseDeclaration()
         res = True
     else:
         res = False
+
     # перед поверненням - зменшити відступ
     indent = predIndt()
-    return res
+    return resType, res
+
 
 
 def parseExpression():
@@ -330,21 +404,25 @@ def parseExpression():
     indent = nextIndt()
     print(indent + 'parseExpression():')
     numLine, lex, tok = getSymb()
-    parseTerm()
+    lType = parseTerm()
     F = True
-    # продовжувати розбирати Доданки (Term)
-    # розділені лексемами '+' або '-'
     while F:
         numLine, lex, tok = getSymb()
         if tok in ('add_op', 'rel_op', 'mul_op', 'pow_op'):
             numRow += 1
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-            parseTerm()
+            rType = parseTerm()
+            resType = getTypeOp(lType, lex, rType)
+            if resType != 'type_error':
+                lType = resType
+            else:
+                tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
+                failParse(resType, tpl)
         else:
             F = False
     # перед поверненням - зменшити відступ
     indent = predIndt()
-    return True
+    return resType
 
 
 # Функція для розбору ідентифікатора

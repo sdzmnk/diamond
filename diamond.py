@@ -8,7 +8,7 @@ tokenTable = {
     ':': 'punct', '#': 'sharp', ' ': 'ws', '\t': 'ws', '\n': 'eol', '\r\n': 'eol',
     'until': 'keyword', 'switch': 'keyword', 'case': 'keyword', 'elif': 'keyword', 'default': 'keyword',
     'split': 'keyword', 'do': 'keyword', 'else': 'keyword', 'in': 'keyword', 'while': 'keyword',
-    ']': 'brackets_op', '[': 'brackets_op', '..': 'range_op', '^': 'type_var', 'begin': 'keyword', 'int': 'int', 'float': 'float',
+    ']': 'brackets_op', '[': 'brackets_op', '..': 'range_op', '^': 'type_var', 'begin': 'keyword', 'int': 'int', 'float': 'float', 'finish': 'keyword'
 }
 # Решту токенів визначаємо не за лексемою, а за заключним станом
 tokStateTable = {2: 'id', 5: 'float', 6: 'int', 9: 'rel_op or assign_op', 11: 'mult_op', 24: 'comment', 28:'dot', 29:'add_op', 41:'type_var'}
