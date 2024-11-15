@@ -120,6 +120,9 @@ def getTypeOp(lType, op, rType):
     #     typeRes = 'void'
     elif op == '=' and typesAreSame:
         typeRes = rType
+    elif (lType in ('boolval') and rType in ('int', 'float')) or (rType in ('boolval') and lType in ('int', 'float')):
+        tpl = (lType,rType)
+        failParse('несумісність типів', tpl)
     else:
         typeRes = 'type_error'
     return typeRes
@@ -171,6 +174,8 @@ def getSymb():
     return numLine, lexeme, token
 # Обробити помилки
 # вивести поточну інформацію та діагностичне повідомлення
+
+#несумісність типів
 def failParse(str, tuple):
     if str == 'неочікуваний кінець програми':
         (lexeme, token, numRow) = tuple
@@ -187,6 +192,11 @@ def failParse(str, tuple):
         (numRow) = tuple
         print(
             f'Помилка: ділення на нуль у рядку  {numRow}. \n\t ')
+        exit(1001)
+    if str == 'несумісність типів':
+        (lType, rType) = tuple
+        print(
+            f'Несумісність типів  {lType}, {rType} . \n\t ')
         exit(1001)
     if str == 'неприпустимий тип':
         (numLine, lexeme, token) = tuple
@@ -504,8 +514,6 @@ def parseExpression():
             else:
                 tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
                 failParse(resType, tpl)
-        # elif tokT == 'brackets_op':
-
 
         else:
             F = False
