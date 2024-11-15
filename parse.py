@@ -46,7 +46,7 @@ def parseDeclarList():
             parseToken('^', 'type_var')  # Очікуємо знак типу змінної
             numLineT, lexT, tokT = getSymb()
             numRow += 1
-            if lexT in ('int', 'float'):  # Якщо тип змінної - int або float
+            if lexT in ('int', 'float', 'boolval'):  # Якщо тип змінної - int або float
                 procTableOfVar(numLine, lex, tokT, 'undefined')  # Додаємо змінну в таблицю
             else:
                 failParse('неприпустимий тип', (numLineT, lexT, tokT))  # Помилка: неправильний тип
@@ -92,22 +92,36 @@ def getTypeConst(literal):
     # tableOfConst - словник {literal:(indx,type)}
     return tableOfConst[literal][1]
 
-def getTypeOp(lType,op,rType):
-    # типи збiгаються?
-    typesAreSame = lType == rType
-    # типи арифметичнi?
-    typesArithm = lType in ('int','float') and rType in ('int','float')
+def getTypeOp(lType, op, rType):
+    # Check if types are the same
+    typesAreSame = lType == rType or rType==None or lType==None
+    # Check if types are arithmetic
+    typesArithm = lType in ('int', 'float') and rType in ('int', 'float')
+    typesAreDif = lType != rType
 
-    if typesAreSame and typesArithm and op in '+-*/' : typeRes = lType
-
-    elif typesAreSame and typesArithm and op in ('<','<=','>','>=','==','!='):
-        typeRes = 'bool'
-
-    elif typesAreSame and op in ('='):
-        typeRes = 'void'
-
-    else: typeRes = 'type_error'
-
+    if typesAreSame and typesArithm and op in '+-* /':
+        typeRes = lType
+    elif typesAreSame and typesArithm and op in ('<', '<=', '>', '>=', '==', '!='):
+        typeRes = 'boolval'
+    elif typesAreDif and typesArithm and op in ('<', '<=', '>', '>=', '==', '!='):
+        typeRes = 'boolval'
+    elif typesAreDif and op == '=':
+        typeRes = rType
+    elif typesArithm and op in '+-* /':
+        if lType == 'int' and rType == 'int':
+            typeRes = 'int'
+        elif lType == 'int' and rType == 'float':
+            typeRes = 'float'
+        elif lType == 'float' and rType == 'int':
+            typeRes = 'float'
+        elif lType == 'float' and rType == 'float':
+            typeRes = 'float'
+    # elif op == '=' and typesAreSame:
+    #     typeRes = 'void'
+    elif op == '=' and typesAreSame:
+        typeRes = rType
+    else:
+        typeRes = 'type_error'
     return typeRes
 
 # Функція перевіряє, чи у поточному рядку таблиці розбору зустрілась вказана лексема lexeme з токеном token параметр indent - відступ при виведенні у консоль
@@ -155,8 +169,6 @@ def getSymb():
     # tableOfSymb[numRow]={numRow: (numLine, lexeme, token, indexOfVarOrConst)
     numLine, lexeme, token, _ = tableOfSymb[numRow]
     return numLine, lexeme, token
-
-
 # Обробити помилки
 # вивести поточну інформацію та діагностичне повідомлення
 def failParse(str, tuple):
@@ -165,6 +177,16 @@ def failParse(str, tuple):
         print(
             'Parser ERROR: \n\t Неочікуваний кінець програми - в таблиці символів (розбору) немає запису з номером {1}. \n\t Очікувалось - {0}'.format(
                 (lexeme, token), numRow))
+        exit(1001)
+    if str == 'використання змінної, що не набула значення':
+        (numRow) = tuple
+        print(
+            f'Використання змінної, що не набула значення -  в рядку {numRow}. \n\t ')
+        exit(1001)
+    if str == 'ділення на нуль':
+        (numRow) = tuple
+        print(
+            f'Помилка: ділення на нуль у рядку  {numRow}. \n\t ')
         exit(1001)
     if str == 'неприпустимий тип':
         (numLine, lexeme, token) = tuple
@@ -254,7 +276,9 @@ def parseStatement():
 
     # прочитаємо поточну лексему в таблиці розбору
     numLine, lex, tok = getSymb()
-
+    # Ініціалізуємо змінні
+    resType = None
+    res = False
     if tok == 'id':
         resType = parseAssign()
         res = True
@@ -285,6 +309,10 @@ def parseStatement():
         resType = parseOut()
         res = True
 
+    elif (lex, tok) == ('gets', 'keyword'):
+        resType = parseInp()
+        res = True
+
     elif (lex, tok) == ('elif', 'keyword'):
         res = False
 
@@ -310,33 +338,27 @@ def parseInp():
     # відступ збільшити
     indent = nextIndt()
     print(indent + 'parseInp():')
-
+    resType = None
     # встановити номер нової поточної лексеми
     if parseToken('gets', 'keyword'):
         parseToken('.', 'punct')
-        parseToken('chomp', 'keyword')
         numLine, lex, tok = getSymb()
-        if lex == '.':
-            parseToken('.', 'punct')
+        if lex == 'to_i':
+            parseToken('to_i', 'keyword')
+            resType = 'int'
+            res = True
+        elif lex == 'to_f':
+            parseToken('to_f', 'keyword')
+            resType = 'float'
+            res = True
+        else:
             numLine, lex, tok = getSymb()
-            if lex == 'to_i':
-                parseToken('to_i', 'keyword')
-                res = True
-
-            elif lex == 'to_f':
-                parseToken('to_f', 'keyword')
-                res = True
-            else:
-                numLine, lex, tok = getSymb()
-                failParse('невідповідність інструкцій', (numLine, lex, tok, 'to_i або to_f'))
-                res = False
-        res = True
-
+            failParse('невідповідність інструкцій', (numLine, lex, tok, 'to_i або to_f'))
+            res = False
     else:
         res = False
-    # перед поверненням - зменшити відступ
     indent = predIndt()
-    return res
+    return resType, res
 
 
 def parseDeclaration():
@@ -369,33 +391,72 @@ def parseAssign():
     numRow += 1
     numLineT, lexT, tokT = getSymb()
     lType = getTypeVar(lex)
-
     if lType == 'undeclared_variable':
         failParse('використання неоголошеної змінної', (numLine, lex, tok))
     isInitVar(lex)
-    # Перевірка на ініціалізацію змінної перед присвоєнням
-    # if not isInitVar(lex):
-    #     failParse('присвоєння неініціалізованої змінної', (numLine, lex, tok))
-
+    resType = None
+    isExtendedExpression = False
     if lexT == '=':
         parseToken('=', 'assign_op')
-        numLine, lex, tok = getSymb()
-        rType = parseExpression()
-        resType = getTypeOp(lType, '=', rType)
-        if resType == 'type_error':
-            failParse(resType, (numLine, lex,))
-        res = True
-    elif lex == ',':
+        numLineN, lexN, tokN = getSymb()
+        if lexN == 'gets':
+            parseInp()
+            res = True
+        elif lexN == '(':
+            parseToken('(', 'brackets_op')
+            rType = parseExpression()  # Отримуємо тип виразу всередині дужок
+            parseToken(')', 'brackets_op')
+
+            # Перевіряємо, чи є продовження виразу після закритої дужки (+)
+            numLineNext, lexNext, tokNext = getSymb()
+            if tokNext in ['add_op','mult_op', 'pow_op']:
+                isExtendedExpression = True
+                lTypebrac = rType
+                numRow += 1  # Переходимо до наступного токена (після операції)
+                numLineNextN, lexNextN, tokNextN = getSymb()  # Оновлюємо поточний токен
+                if lexNext == '/' and lexNextN == '0':
+                    tpl = (numLineNext)  # Використання неоголошеної або неініціалізованої змінної
+                    failParse('ділення на нуль', tpl)
+                rType = parseExpression()  # Продовжуємо обробку всього виразу
+
+                resType = getTypeOp(lTypebrac, '+', rType)
+                tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+
+                if resType == 'type_error':
+                    failParse(resType, (numLine, lexN,))
+                res = True
+            if isExtendedExpression == False:
+                resType = getTypeOp(lType, '=', rType)
+
+                tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+
+                if resType == 'type_error':
+                    failParse(resType, (numLine, lexN,))
+                res = True
+
+            # resType = getTypeOp(lType, '=', rType)
+            # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+            #
+            # if resType == 'type_error':
+            #     failParse(resType, (numLine, lexN,))
+            # res = True
+
+        else:
+            rType = parseExpression()
+            resType = getTypeOp(lType, '=', rType)
+            tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип
+            if resType == 'type_error':
+                failParse(resType, (numLine, lexN,))
+            res = True
+    elif lexT == ',':
         parseToken(',', 'punct')
         parseDeclaration()
         res = True
     else:
         res = False
 
-    # перед поверненням - зменшити відступ
     indent = predIndt()
     return resType, res
-
 
 
 def parseExpression():
@@ -405,24 +466,53 @@ def parseExpression():
     print(indent + 'parseExpression():')
     numLine, lex, tok = getSymb()
     lType = parseTerm()
+    if lType == 'id':
+        print(lex)
+        if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи змінна має значення
+            tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+            failParse('використання змінної, що не набула значення', tpl)
+        else:
+            var_type = tableOfVar[lex][1]
+            lType = var_type
+            print(lType)
+    resType = lType
     F = True
     while F:
-        numLine, lex, tok = getSymb()
-        if tok in ('add_op', 'rel_op', 'mul_op', 'pow_op'):
+        numLineT, lexT, tokT = getSymb()
+
+        if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
             numRow += 1
-            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+            numLineR, lexR, tokR = getSymb()
+            print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
             rType = parseTerm()
-            resType = getTypeOp(lType, lex, rType)
+
+            if lexT == '/' and lexR == '0':
+                tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+                failParse('ділення на нуль', tpl)
+            if rType == 'id':
+                if tableOfVar[lexR][2] == 'undefined':  # Перевірка, чи змінна має значення
+                    tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+                    failParse('використання змінної, що не набула значення', tpl)
+                else:
+                    var_type = tableOfVar[lexR][1]
+                    rType = var_type
+
+
+            resType = getTypeOp(lType, lexT, rType)
             if resType != 'type_error':
                 lType = resType
             else:
                 tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
                 failParse(resType, tpl)
+        # elif tokT == 'brackets_op':
+
+
         else:
             F = False
     # перед поверненням - зменшити відступ
     indent = predIndt()
     return resType
+
 
 
 # Функція для розбору ідентифікатора
@@ -507,8 +597,15 @@ def parseDefaultBlock():
 def parseStatementListSwitch():
     global numRow
     indent = nextIndt()  # Збільшити відступ
+    print(indent + 'parseStatementListSwitch():')
+
     while True:
         numLine, lex, tok = getSymb()
+
+        # Перевіряємо, чи досягнуто кінець блоку switch
+        if (lex, tok) == ('end', 'keyword'):
+            break
+
         if tok == 'keyword':
             if lex == 'case':
                 # Якщо знайдено 'case', викликати parseCaseBlock
@@ -520,6 +617,8 @@ def parseStatementListSwitch():
                 if not parseDefaultBlock():
                     print('Parser ERROR: Не вдалося обробити блок default.')
                     exit(2002)  # Код помилки для блоків default
+                # Після обробки default завершити блок switch
+                break
             else:
                 # Тут можуть бути інші ключові слова чи оператори
                 if not parseStatement():  # Якщо це не case чи default, викликати парсинг звичайних операторів
@@ -530,6 +629,7 @@ def parseStatementListSwitch():
 
     # Повернутися на один рівень у відступі
     indent = predIndt()
+
 
 def parseDigit():
     global numRow
@@ -555,21 +655,13 @@ def parseTerm():
     # відступ збільшити
     indent = nextIndt()
     print(indent + 'parseTerm():')
-    parseFactor()
+    res = parseFactor()
     F = True
     # продовжувати розбирати Множники (Factor)
     # розділені лексемами '*' або '/'
-    while F:
-        numLine, lex, tok = getSymb()
-        if tok in ('mult_op'):
-            numRow += 1
-            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-            parseFactor()
-        else:
-            F = False
     # перед поверненням - зменшити відступ
     indent = predIndt()
-    return True
+    return res
 
 
 def parseFactor():
@@ -579,10 +671,10 @@ def parseFactor():
     print(indent + 'parseFactor():')
     numLine, lex, tok = getSymb()
 
-    if tok in ('int', 'float', 'id', 'add_op'):
+    if tok in ('int', 'float', 'id', 'add_op', 'mult_op'):
         numRow += 1
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-        if tok in ('add_op'):
+        if tok in ('add_op', 'mult_op'):
             numLine, lex, tok = getSymb()
             if lex == '(':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
@@ -605,7 +697,7 @@ def parseFactor():
                   (numLine, lex, tok, 'rel_op, int, float, id або \'(\' Expression \')\''))
     # перед поверненням - зменшити відступ
     indent = predIndt()
-    return True
+    return tok
 
 
 # розбір інструкції розгалуження за правилом
@@ -617,7 +709,7 @@ def parseIf():
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
-
+    resType = None
     if lex == 'if' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
@@ -646,7 +738,7 @@ def parseIf():
 
     # перед поверненням - зменшити відступ
     indent = predIndt()
-    return res
+    return resType, res
 
 
 def parseWhile():
