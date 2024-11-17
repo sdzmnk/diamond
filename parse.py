@@ -175,7 +175,7 @@ def getSymb():
 # Обробити помилки
 # вивести поточну інформацію та діагностичне повідомлення
 
-#несумісність типів
+#failParse('кількість ідентифікаторів не дорівнює кількості значень', (numLine))
 def failParse(str, tuple):
     if str == 'неочікуваний кінець програми':
         (lexeme, token, numRow) = tuple
@@ -192,6 +192,11 @@ def failParse(str, tuple):
         (numRow) = tuple
         print(
             f'Помилка: ділення на нуль у рядку  {numRow}. \n\t ')
+        exit(1001)
+    if str == 'кількість ідентифікаторів не дорівнює кількості значень':
+        (numRow) = tuple
+        print(
+            f'Помилка: кількість ідентифікаторів не дорівнює кількості значень у рядку  {numRow}. \n\t ')
         exit(1001)
     if str == 'несумісність типів':
         (lType, rType) = tuple
@@ -379,23 +384,62 @@ def parseDeclaration():
 
     resType = None
     # Розбираємо ідентифікатори з лівого боку присвоєння
-    lType = [None]  # Ініціалізація списку для типів зліва
-    lType[0] = parseIdentList()
+    lType = parseIdentList()  # Отримуємо список ідентифікаторів
+    print(f"Identifiers: {lType}")
 
     # Переконатися, що токен '=' правильно розібраний
     parseToken('=', 'assign_op')
 
     # Розбираємо вирази з правого боку присвоєння
-    rType = [None]  # Ініціалізація списку для типів справа
-    rType[0] = parseExpressionList()
+    rType = parseExpressionList()  # Отримуємо список виразів
+    print(f"Expressions: {rType}")
 
-    # Отримуємо тип операції
-    resType = getTypeOp(lType[0], '=', rType[0])
+    # Перевіряємо, чи кількість ідентифікаторів відповідає кількості виразів
+    if len(lType) != len(rType):
+        failParse('кількість ідентифікаторів не дорівнює кількості значень', (numLine))
 
-    tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
+    # Обробка пар ідентифікаторів і виразів
+    i = 0
+    n = 2
+    while i < len(lType):  # Проходимо по всіх ідентифікаторах
+        # Отримуємо тип операції
+        resType = getTypeOp(lType[i], '=', rType[i])
+        print(resType)
+        print(lex)
+
+        # Оновлення таблиці змінних для поточного ідентифікатора
+        tableOfVar[lex] = (n, resType, 'assigned')
+        n += 1
+        # Отримання наступного ключа після поточного
+        next_lex = get_next_key(tableOfVar, lex)
+        if next_lex:
+            lex = next_lex  # Оновлюємо lex на наступний ключ
+        else:
+            break  # Якщо наступного ключа немає, припиняємо цикл
+
+        i += 1  # Переходимо до наступної пари
 
     indent = predIndt()
     return resType
+
+
+def get_next_key(tableOfVar, current_key):
+    # Отримуємо список всіх ключів таблиці
+    keys = list(tableOfVar.keys())
+
+    # Знайдемо індекс поточного ключа
+    try:
+        current_index = keys.index(current_key)
+    except ValueError:
+        raise KeyError(f"Ключ {current_key} не знайдений у таблиці змінних.")
+
+    # Якщо поточний ключ не є останнім, повертаємо наступний
+    if current_index + 1 < len(keys):
+        next_key = keys[current_index + 1]
+        return next_key
+    else:
+        # Якщо поточний ключ останній, то повертаємо None або будь-яке значення за замовчуванням
+        return None
 
 
 def parseAssign():
@@ -926,9 +970,10 @@ def parseIdentList():
     global numRow
     indent = nextIndt()  # Збільшуємо відступ для виводу
     print(indent + 'parseIdentList():')  # Виводимо назву функції
-    resType = None
+    resType = []  # Ініціалізуємо порожній список для збереження ідентифікаторів
+
     # Розбираємо перший ідентифікатор
-    resType = parseIdent()
+    resType.append(parseIdent())
 
     # Поки є символи коми, продовжуємо розбір ідентифікаторів
     while True:
@@ -936,14 +981,14 @@ def parseIdentList():
 
         if tok == 'punct' and lex == ',':
             parseToken(',', 'punct')  # Розбираємо кому
-            resType = parseIdent()  # Розбираємо наступний ідентифікатор
-            return  resType
+            resType.append(parseIdent())  # Додаємо наступний ідентифікатор до списку
         else:
             # Якщо токен не кома, виходимо з циклу
             break
 
     indent = predIndt()  # Зменшуємо відступ перед поверненням
-    return resType  # Повертаємо True, якщо розбір пройшов успішно
+    return resType  # Повертаємо список ідентифікаторів
+
 
 firstNumber = 1
 def parseExpressionList():
@@ -952,10 +997,12 @@ def parseExpressionList():
     numLine, lex, tok = getSymb()
     indent = nextIndt()  # Збільшуємо відступ для виводу
     print(indent + 'parseExpressionList():')  # Виводимо назву функції
-    resType = None
-    firstNumber = lex
-    # Розбираємо перше вираження
-    resType = parseExpression()
+
+    resType = []  # Ініціалізуємо список для збереження типів виразів
+    firstNumber = lex  # Зберігаємо значення першого виразу
+
+    # Розбираємо перше вираження, але не додаємо до списку
+    parseExpression()
 
     # Поки є символи коми, продовжуємо розбір виражень
     while True:
@@ -963,14 +1010,13 @@ def parseExpressionList():
 
         if tok == 'punct' and lex == ',':
             parseToken(',', 'punct')  # Розбираємо кому
-            resType = parseExpression()  # Розбираємо наступне вираження
-
+            resType.append(parseExpression())  # Додаємо наступний вираз до списку
         else:
             # Якщо токен не кома, виходимо з циклу
             break
 
     indent = predIndt()  # Зменшуємо відступ перед поверненням
-    return resType  # Повертаємо True, якщо розбір пройшов успішно
+    return resType  # Повертаємо список результатів
 
 
 
