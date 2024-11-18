@@ -38,15 +38,18 @@ def parseProgram():
 
 def parseDeclarList():
     global numRow
+    indent = nextIndt()
+    print(indent + 'parseDeclarList():')
     numLine, lex, tok = getSymb()
-
     while (lex, tok) != ('begin', 'keyword'):  # Доки не зустріли 'begin'
+        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         if tok == 'id':  # Якщо токен - це ідентифікатор
             numRow += 1
             parseToken('^', 'type_var')  # Очікуємо знак типу змінної
             numLineT, lexT, tokT = getSymb()
             numRow += 1
             if lexT in ('int', 'float', 'boolval'):  # Якщо тип змінної - int або float
+                print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
                 procTableOfVar(numLine, lex, tokT, 'undefined')  # Додаємо змінну в таблицю
             else:
                 failParse('неприпустимий тип', (numLineT, lexT, tokT))  # Помилка: неправильний тип
@@ -54,6 +57,7 @@ def parseDeclarList():
             failParse('очікувався ідентифікатор', (numLine, lex, tok))  # Помилка: очікувався ідентифікатор
 
         numLine, lex, tok = getSymb()  # Читання наступного токену
+
 
 
 
@@ -385,14 +389,12 @@ def parseDeclaration():
     resType = None
     # Розбираємо ідентифікатори з лівого боку присвоєння
     lType = parseIdentList()  # Отримуємо список ідентифікаторів
-    print(f"Identifiers: {lType}")
 
     # Переконатися, що токен '=' правильно розібраний
     parseToken('=', 'assign_op')
 
     # Розбираємо вирази з правого боку присвоєння
     rType = parseExpressionList()  # Отримуємо список виразів
-    print(f"Expressions: {rType}")
 
     # Перевіряємо, чи кількість ідентифікаторів відповідає кількості виразів
     if len(lType) != len(rType):
@@ -404,8 +406,6 @@ def parseDeclaration():
     while i < len(lType):  # Проходимо по всіх ідентифікаторах
         # Отримуємо тип операції
         resType = getTypeOp(lType[i], '=', rType[i])
-        print(resType)
-        print(lex)
 
         # Оновлення таблиці змінних для поточного ідентифікатора
         tableOfVar[lex] = (n, resType, 'assigned')
