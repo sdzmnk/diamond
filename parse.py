@@ -458,7 +458,6 @@ def parseAssign():
     lType = getTypeVar(lex)
     if lType == 'undeclared_variable':
         failParse('використання неоголошеної змінної', (numLine, lex, tok))
-    isInitVar(lex)
     resType = None
     isExtendedExpression = False
     if lexT == '=':
@@ -482,6 +481,7 @@ def parseAssign():
                 if lexNext == '/' and lexNextN == '0':
                     tpl = (numLineNext)  # Використання неоголошеної або неініціалізованої змінної
                     failParse('ділення на нуль', tpl)
+
                 rType = parseExpression()  # Продовжуємо обробку всього виразу
 
                 resType = getTypeOp(lTypebrac, '+', rType)
@@ -500,6 +500,7 @@ def parseAssign():
                 res = True
 
         else:
+
             rType = parseExpression()
             resType = getTypeOp(lType, '=', rType)
             tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип
@@ -516,7 +517,7 @@ def parseAssign():
         res = True
     else:
         res = False
-
+    isInitVar(lex)
     indent = predIndt()
     return resType, res
 
@@ -528,13 +529,18 @@ def parseExpression():
     print(indent + 'parseExpression():')
     numLine, lex, tok = getSymb()
     lType = parseTerm()
+    # print(lex)
     if lType == 'id':
-        if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи змінна має значення
-            tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
-            failParse('використання змінної, що не набула значення', tpl)
+        lType = getTypeVar(lex)
+        if lType == 'undeclared_variable':
+            failParse('використання неоголошеної змінної', (numLine, lex, tok))
         else:
-            var_type = tableOfVar[lex][1]
-            lType = var_type
+            if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи змінна має значення
+                tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+                failParse('використання змінної, що не набула значення', tpl)
+            else:
+                var_type = tableOfVar[lex][1]
+                lType = var_type
     resType = lType
     F = True
     while F:
