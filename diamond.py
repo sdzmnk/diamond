@@ -26,9 +26,9 @@ stf = {(0, 'Letter'): 1, (1, 'Letter'): 1, (1, 'Digit'): 1, (1, 'underline'): 1,
                                               (7, 'other'): 9,
        (0, '*'): 10, (10, '*'): 12,
        (10, 'other'): 11,
-       (0, '['): 13, (0, ']'): 13, (0, '('): 13, (0, ')'): 13, (0, '/'): 13,
+       (0, '['): 13, (0, ']'): 13, (0, '('): 13, (0, ')'): 13, (0, '/'): 13, (0, '+'): 13, (0, '^'):13, (0, '-'):13,
        (0, ','): 13,(0, '"'): 13, (0, ':'): 13,
-       (0, '+'): 14, (0, '-'): 14, (14, 'other'): 29, (14, 'Digit'): 3,
+       #(0, '-'): 14, (14, 'other'): 29, (14, 'Digit'): 3, #(0, '+'): 14,
        (0, '!'): 19, (19, '='): 20,
        (19, 'other'): 102,
        (0, '#'): 22, (22, 'Digit'): 22, (22, 'Letter'): 22, (22, '-'): 22,  (22, '['): 22, (22, ']'): 22,
@@ -37,7 +37,7 @@ stf = {(0, 'Letter'): 1, (1, 'Letter'): 1, (1, 'Digit'): 1, (1, 'underline'): 1,
        (0, 'eol'): 25,
        (0, 'dot'): 26, (26, 'dot'): 27, (26, 'Letter'): 30,
                     (27, 'other'): 28, (26, 'other'): 101, (30, 'other'): 101,
-        (0, '^'): 40, (40, 'other'): 41,
+       #(0, '^'): 40, (40, 'other'): 41,
        (0, 'other'): 101,
        (0, 'ws'): 0,
        }
@@ -105,7 +105,7 @@ def processing():
     numLine+=1
     state=initState
 
-  if state in (2,5,6,17,18):	# keyword, id, float, int
+  if state in (2,11,5,6,17,18):	# keyword, id, float, int
     token=getToken(state,lexeme)
     if token!='keyword': # не keyword
       index=indexIdConst(state,lexeme)
@@ -159,6 +159,7 @@ def processing():
       print('{0:<3d} {1:<10s} {2:<10s} '.format(numLine, lexeme, token))
       tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, '')
       lexeme = ''
+      numChar = putCharBack(numChar)
       state = initState
 
   if state in (29, 30):  # punct (стан пунктуації)
@@ -168,6 +169,7 @@ def processing():
       lexeme = ''
       numChar = putCharBack(numChar)  # зірочка
       state = initState
+
 
 
   if state in Ferror:  #(101,102):  # ERROR

@@ -737,12 +737,66 @@ def parseTerm():
     return res
 
 
+# def parseFactor():
+#     global numRow
+#     # відступ збільшити
+#     indent = nextIndt()
+#     print(indent + 'parseFactor():')
+#     numLine, lex, tok = getSymb()
+#
+#     if tok in ('int', 'float', 'id', 'add_op', 'mult_op'):
+#         numRow += 1
+#         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#         if tok in ('add_op', 'mult_op'):
+#             numLine, lex, tok = getSymb()
+#             if lex == '(':
+#                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#                 numRow += 1
+#                 parseExpression()
+#                 parseToken(')', 'brackets_op')
+#             if tok == 'id':
+#                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#                 numRow += 1
+#
+#     # третя альтернатива для Factor
+#     # якщо лексема - це відкриваюча дужка
+#     elif lex == '(':
+#         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#         numRow += 1
+#         parseExpression()
+#         parseToken(')', 'brackets_op')
+#     else:
+#         failParse('невідповідність у Expression.Factor',
+#                   (numLine, lex, tok, 'rel_op, int, float, id або \'(\' Expression \')\''))
+#     # перед поверненням - зменшити відступ
+#     indent = predIndt()
+#     return tok
+
+
+
 def parseFactor():
     global numRow
-    # відступ збільшити
+    # Збільшуємо відступ
     indent = nextIndt()
     print(indent + 'parseFactor():')
     numLine, lex, tok = getSymb()
+
+    # Обробка унарних операторів
+    if tok == 'add_op' and lex in ('+', '-'):  # Якщо це '+' або '-'
+        unary_op = lex  # Зберігаємо оператор
+        numRow += 1  # Переходимо до наступної лексеми
+        numLine, lex, tok = getSymb()  # Отримуємо наступну лексему
+
+        if tok in ('int', 'float'):  # Якщо наступна лексема - число
+            if unary_op == '-':
+                lex = str(-float(lex)) if '.' in lex else str(-int(lex))  # Застосовуємо унарний мінус
+            elif unary_op == '+':
+                lex = str(float(lex)) if '.' in lex else str(int(lex))  # Унарний плюс не змінює значення
+            numRow += 1  # Переходимо до наступної лексеми
+            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+            return 'float' if '.' in lex else 'int'  # Повертаємо тип числа
+        else:
+            failParse('Унарний оператор застосовано не до числа', (numLine, lex, tok))
 
     if tok in ('int', 'float', 'id', 'add_op', 'mult_op'):
         numRow += 1
