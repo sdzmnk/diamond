@@ -107,6 +107,8 @@ def getTypeOp(lType, op, rType):
         typeRes = lType
     elif typesAreSame and typesArithm and op in ('<', '<=', '>', '>=', '==', '!='):
         typeRes = 'boolval'
+    elif op in ('**'):
+        typeRes = 'float'
     elif typesAreDif and typesArithm and op in ('<', '<=', '>', '>=', '==', '!='):
         typeRes = 'boolval'
     elif typesAreDif and op == '=':
