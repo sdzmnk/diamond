@@ -16,12 +16,11 @@ a=4--5
 
 a=(-3.4*4)/10
 b=3.8*4
-
-b=2**3
+b=3 ** 4
 
 input1=gets.to_i
 input2 = gets.to_f
-a = input2 > 8
+a=input2>8
 c = input1 < 7
 
 if a > 8
