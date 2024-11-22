@@ -15,6 +15,9 @@ numRow = 1
 len_tableOfSymb = len(tableOfSymb)
 print(('len_tableOfSymb', len_tableOfSymb))
 tableOfVar = {}
+tableOfLabel = {}
+postfixCode = []
+toView = True
 
 # Функція для розбору за правилом
 # Program = {Comment | StatementList} end
@@ -30,6 +33,8 @@ def parseProgram():
         # повідомити про синтаксичну коректність програми
         print('Parser: Синтаксичний аналіз завершився успішно')
         print('tableOfVar:{0}'.format(tableOfVar))
+        print('tableOfLabel:{0}'.format(tableOfLabel))
+        print('postfixCode:{0}'.format(postfixCode))
         return True
     except SystemExit as e:
         # Повідомити про факт виявлення помилки
@@ -443,6 +448,16 @@ def get_next_key(tableOfVar, current_key):
         # Якщо поточний ключ останній, то повертаємо None або будь-яке значення за замовчуванням
         return None
 
+def postfixCodeGen(case,toTran):
+    if case == 'lval':
+        lex,tok = toTran
+        postfixCode.append((lex,'l-val'))
+    elif case == 'rval':
+        lex,tok = toTran
+        postfixCode.append((lex,'r-val'))
+    else:
+        lex,tok = toTran
+        postfixCode.append((lex,tok))
 
 def parseAssign():
     # номер запису таблиці розбору
@@ -458,6 +473,10 @@ def parseAssign():
     numRow += 1
     numLineT, lexT, tokT = getSymb()
     lType = getTypeVar(lex)
+
+    postfixCodeGen('lval', (lex, tok))
+    if toView: configToPrint(lex, numRow)
+
     if lType == 'undeclared_variable':
         failParse('використання неоголошеної змінної', (numLine, lex, tok))
     resType = None
@@ -486,6 +505,9 @@ def parseAssign():
 
                 rType = parseExpression()  # Продовжуємо обробку всього виразу
 
+                postfixCodeGen(tokNext, (lexNext, tokNext))
+                if toView: configToPrint(lexNext, numLineNext)
+
                 resType = getTypeOp(lTypebrac, '+', rType)
                 tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
 
@@ -500,12 +522,18 @@ def parseAssign():
                 if resType == 'type_error':
                     failParse(resType, (numLine, lexN,))
                 res = True
+            postfixCodeGen(lexT, (lexT, tokT))
+            if toView: configToPrint(lex, numRow)
 
         else:
 
             rType = parseExpression()
             resType = getTypeOp(lType, '=', rType)
             tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип
+
+            postfixCodeGen(lexT, (lexT, tokT))
+            if toView: configToPrint(lex, numRow)
+
             if resType == 'type_error':
                 failParse(resType, (numLine, lexN,))
             res = True
@@ -520,6 +548,8 @@ def parseAssign():
     else:
         res = False
     isInitVar(lex)
+    # postfixCodeGen('=', ('=', 'assign_op'))
+    # if toView: configToPrint(lex, numRow)
     indent = predIndt()
     return resType, res
 
@@ -549,6 +579,7 @@ def parseExpression():
         numLineT, lexT, tokT = getSymb()
 
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
+
             numRow += 1
             numLineR, lexR, tokR = getSymb()
             print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
@@ -572,6 +603,9 @@ def parseExpression():
             else:
                 tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
                 failParse(resType, tpl)
+
+            postfixCodeGen(lexT, (lexT, tokT))
+            if toView: configToPrint(lexT, numLineT)
 
         else:
             F = False
@@ -775,14 +809,12 @@ def parseTerm():
 #     return tok
 
 
-
 def parseFactor():
     global numRow
     # Збільшуємо відступ
     indent = nextIndt()
     print(indent + 'parseFactor():')
     numLine, lex, tok = getSymb()
-
     # Обробка унарних операторів
     if tok == 'add_op' and lex in ('+', '-'):  # Якщо це '+' або '-'
         unary_op = lex  # Зберігаємо оператор
@@ -801,8 +833,18 @@ def parseFactor():
             failParse('Унарний оператор застосовано не до числа', (numLine, lex, tok))
 
     if tok in ('int', 'float', 'id', 'add_op', 'mult_op'):
+
+        if tok == 'id':
+
+            postfixCodeGen('rval', (lex, 'rval'))
+            if toView: configToPrint(lex, numRow)
+        else:
+            postfixCodeGen('const',(lex, tok))
+            if toView: configToPrint(lex, numRow)
+
         numRow += 1
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+
         if tok in ('add_op', 'mult_op'):
             numLine, lex, tok = getSymb()
             if lex == '(':
@@ -843,8 +885,12 @@ def parseIf():
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
         parseBoolExpr()
+
+        m1 = createLabel()
+        postfixCode.append(m1)
+        postfixCode.append(('JF','jf'))
+
         parseStatementList()  # Виконуємо парсинг блоку if
-        #parseToken('elif', 'keyword')
         while True:
             numLine, lex, tok = getSymb()
             if lex == 'elif' and tok == 'keyword':
@@ -853,6 +899,14 @@ def parseIf():
                 parseBoolExpr() # Парсинг логічного виразу в elif
                 parseStatementList()  # Парсинг блоку elif
             elif lex == 'else' and tok == 'keyword':
+
+                m2 = createLabel()
+                postfixCode.append(m2)
+                postfixCode.append(('JMP', 'jump'))
+                setValLabel(m1)
+                postfixCode.append(m1)
+                postfixCode.append((':','colon'))
+
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
                 numRow += 1
                 parseStatementList()  # Парсинг блоку else
@@ -861,6 +915,9 @@ def parseIf():
                 # Якщо токен не elif або else, повертаємося до завершення if
                 break
         parseToken('end', 'keyword')
+        setValLabel(m2)
+        postfixCode.append(m2)
+        postfixCode.append((':','colon'))
         res = True
     else:
         res = False
@@ -971,6 +1028,9 @@ def parseBoolExpr():
     while F:
         numLine, lex, tok = getSymb()
         if tok in ('rel_op'):
+
+            postfixCode.append((lex,tok))
+
             numRow += 1
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
             parseTerm()
@@ -1124,9 +1184,90 @@ def predIndt():
     indt -= stepIndt
     return ' ' * indt
 
+def compileToPostfix(fileName):
+    global len_tableOfSymb , FSuccess
+    print('compileToPostfix: lexer Start Up\n')
+    FSuccess = lex()
+    print('compileToPostfix: lexer-FSuccess ={0}'.format(FSuccess))
+    # чи був успiшним лексичний розбiр
+    if ('Lexer',True) == FSuccess:
+        len_tableOfSymb = len(tableOfSymb)
+        print('-'*55)
+        print('compileToPostfix: Start Up compiler = parser + codeGenerator\n')
+        FSuccess = (False,'codeGeneration')
+        FSuccess = parseProgram()
+        if FSuccess == (True,'codeGeneration'):
+            #serv()
+            savePostfixCode(fileName)
+    return FSuccess
+
+def configToPrint(lex,numRow):
+    stage = '\nКрок трансляцiї\n'
+    stage += 'лексема: \'{0}\'\n'
+    stage += 'postfixCode = {3}\n'
+    print(stage.format(lex,numRow,str(tableOfSymb[numRow]),str(postfixCode)))
+
+
+# Функція для збереження у файлі postfix-програми
+# це інформація з таблиць:
+# tableOfVar
+# tableOfLabel
+# tableOfConst
+# postfixCodeTSM
+def savePostfixCode(fileName):
+    fname = fileName + ".postfix"
+    f = open(fname, 'w')
+    header = ".target: Postfix Machine\n.version: 0.2\n"
+    f.write(header)
+
+    f.write("\n" + ".vars" + "(\n")
+    for id in tableOfVar:
+        f.write("   {0:4}  {1:10} \n".format(id, tableOfVar[id][1]))
+    f.write(")\n")
+
+    f.write("\n" + ".labels" + "(\n")
+    for lbl in tableOfLabel:
+        f.write("   {0:4}{1:4} \n".format(lbl, tableOfLabel[lbl]))
+    f.write(")\n")
+
+    f.write("\n" + ".constants" + "(\n")
+    for literal in tableOfConst:
+        f.write("   {0:4}  {1:10} \n".format(literal, tableOfConst[literal][1]))
+    f.write(")\n")
+
+    f.write("\n" + ".code" + "(\n")
+    for instr in postfixCodeTSM:
+        f.write("   " + str(instr[0]).ljust(6) + str(instr[1]).ljust(6) + "\n")
+    f.write(")\n")
+
+    f.close()
+    print(f"postfix-код збережено у файлі {fname}")
+
+def setValLabel(lbl):
+    global tableOfLabel
+    lex,_tok = lbl
+    tableOfLabel[lex] = len(postfixCode)
+    return True
+
+def createLabel():
+    global tableOfLabel
+    nmb = len(tableOfLabel)+1
+    lexeme = "m"+str(nmb)
+    val = tableOfLabel.get(lexeme)
+    if val is None:
+        tableOfLabel[lexeme] = 'val_undef'
+        tok = 'label'
+    else:
+        tok = 'Конфлiкт мiток'
+        print(tok)
+        exit(1003)
+
+    return (lexeme,tok)
+
 
 # запуск парсера
-if FSuccess == ('Lexer', True):
-    parseProgram()
+#if FSuccess == ('Lexer', True):
+    #parseProgram()
+compileToPostfix("test.my_lang")
 
 
