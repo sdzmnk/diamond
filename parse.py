@@ -577,11 +577,11 @@ def parseExpression():
     F = True
     while F:
         numLineT, lexT, tokT = getSymb()
-
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
 
             numRow += 1
             numLineR, lexR, tokR = getSymb()
+
             print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
             rType = parseTerm()
 
@@ -815,6 +815,7 @@ def parseFactor():
     indent = nextIndt()
     print(indent + 'parseFactor():')
     numLine, lex, tok = getSymb()
+
     # Обробка унарних операторів
     if tok == 'add_op' and lex in ('+', '-'):  # Якщо це '+' або '-'
         unary_op = lex  # Зберігаємо оператор
@@ -832,7 +833,7 @@ def parseFactor():
         else:
             failParse('Унарний оператор застосовано не до числа', (numLine, lex, tok))
 
-    if tok in ('int', 'float', 'id', 'add_op', 'mult_op'):
+    if tok in ('int', 'float', 'id', 'add_op', 'mult_op','boolval'):
 
         if tok == 'id':
 
@@ -1017,29 +1018,29 @@ def parseRange():
 # BoolExpr = Expression ('='|'<='|'>='|'<'|'>'|'<>') Expression
 def parseBoolExpr():
     global numRow
-    # відступ збільшити
     indent = nextIndt()
     print(indent + 'parseBoolExpr():')
     numLine, lex, tok = getSymb()
-    parseTerm()
+    parseTerm()  # Розбираємо перший терм
     F = True
-    # продовжувати розбирати Доданки (Term)
-    # розділені лексемами '+' або '-'
+
     while F:
-        numLine, lex, tok = getSymb()
-        if tok in ('rel_op'):
-
-            postfixCode.append((lex,tok))
-
+        numLine, lex, tok = getSymb()  # Зчитуємо наступний токен
+        if tok == 'rel_op':  # Очікуємо відношення
+            print(indent + f'в рядку {numLine} - токен {lex, tok}')
+            postfixCode.append((lex, tok))  # Додаємо в постфікс
             numRow += 1
-            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-            parseTerm()
-        else:
+            parseTerm()  # Розбираємо терм після rel_op
+        elif tok in ('id', 'int', 'float', 'true', 'false', '('):  # Якщо це допустимий завершальний токен
+            postfixCode.append((lex, tok))
+            F = False
+        else:  # Якщо нічого не підходить, завершуємо
             failParse('mismatch in BoolExpr', (numLine, lex, tok, 'rel_op'))
             F = False
-    # перед поверненням - зменшити відступ
-    indent = predIndt()
+
+    indent = predIndt()  # Зменшуємо відступ
     return True
+
 
 def parseOut():
     global numRow
