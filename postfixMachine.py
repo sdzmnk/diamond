@@ -72,7 +72,7 @@ class PSM():             # Postfix Stack Macine
     self.numLine += 1
     # один порожній рядок обов'язковий 
     if s != "": 
-      raise PMExcept(2)
+      raise PSMExcept(2)
     # інші (можливі) порожні рядки та заголовок секції
     F = True
     while F:
@@ -99,7 +99,7 @@ class PSM():             # Postfix Stack Macine
         self.procSection(section) 
   
   def procSection(self,section):
-    list =self.slt.split() 
+    list =self.slt.split()
     if len(list) !=2:
       raise PSMExcept(4)
     else:
@@ -109,12 +109,12 @@ class PSM():             # Postfix Stack Macine
         table = self.tableOfId
         indx=len(table)+1
         table[item1]=(indx,item2,'val_undef')
-       
+
       if section == "LblDecl":
         table = self.tableOfLabel
         indx=len(table)+1
         table[item1]=item2
-      
+
       if section == "ConstDecl":
         table = self.tableOfConst
         indx=len(table)+1
@@ -122,17 +122,17 @@ class PSM():             # Postfix Stack Macine
           val = int(item1)
         elif item2 == "float":
           val = float(item1)
-        elif item2 == "bool":
-          val = item1  
+        elif item2 == "boolval":
+          val = item1
         table[item1]=(indx,item2,val)
-      
+
       if section == "Code":
         indx=len(self.postfixCode)
         self.postfixCode.append((item1,item2))
         instrNum = len(self.postfixCode)-1
         self.mapDebug[instrNum] = self.numLine
-      
-  
+
+
 
   def postfixExec(self):
     "Виконує postfixCode"
@@ -141,7 +141,7 @@ class PSM():             # Postfix Stack Macine
       while self.numInstr < self.maxNumbInstr:
         if toView: self.stack.print()
         lex,tok = self.postfixCode[self.numInstr]
-        if tok in ('int','float','l-val','r-val','label','bool'):
+        if tok in ('int','float','l-val','r-val','label','boolval'):
           self.stack.push((lex,tok))
           self.numInstr = self.numInstr +1
         elif tok in ('jump','jf','colon'):
@@ -224,7 +224,7 @@ class PSM():             # Postfix Stack Macine
     # зняти з вершини стека запис (лівий операнд)
     (lexL,tokL) = self.stack.pop()
    
-    if (lex,tok) == (':=', 'assign_op'):
+    if (lex,tok) == ('=', 'assign_op'):
       tokL = self.tableOfId[lexL][1]
       if tokL != tokR: 
         print(f'(lexR,tokR)={(lexR,tokR)}\n(lexL,tokL)={(lexL,tokL)}')
@@ -250,7 +250,7 @@ class PSM():             # Postfix Stack Macine
   def getValTypeOperand(self,lex,tok):
     if tok == "r-val":
       if self.tableOfId[lex][2] == 'val_undef':
-        raise PMExcept(8)  #'неініційована змінна', (lexL,tableOfId[lexL], (lexL,tokL
+        raise PSMExcept(8)  #'неініційована змінна', (lexL,tableOfId[lexL], (lexL,tokL
       else:
         type,val = (self.tableOfId[lex][1],self.tableOfId[lex][2])
     elif tok == 'int':
@@ -259,17 +259,20 @@ class PSM():             # Postfix Stack Macine
     elif tok == 'float':
       val = float(lex)
       type = tok
-    elif tok == 'bool':
+    elif tok == 'boolval':
       val = lex
       type = tok
-    return (type,val)
+
+    else:
+      raise PSMExcept(99)
+    return type,val
   
     
   def applyOperator(self,lexTypeValL,arthBoolOp,lexTypeValR):
     (lexL,typeL,valL) = lexTypeValL
     (lexR,typeR,valR) = lexTypeValR
     if typeL != typeR:
-      raise PMExcept(9)  # типи операндів відрізняються
+      raise PSMExcept(9)  # типи операндів відрізняються
     elif arthBoolOp == '+':
       value = valL + valR
     elif arthBoolOp == '-':
@@ -277,7 +280,7 @@ class PSM():             # Postfix Stack Macine
     elif arthBoolOp == '*':
       value = valL * valR
     elif arthBoolOp == '/' and valR ==0:
-      raise PMExcept(10)  # ділення на нуль
+      raise PSMExcept(10)  # ділення на нуль
     elif arthBoolOp == '/' and typeL=='float':
       value = valL / valR
     elif arthBoolOp == '/' and typeL=='int':
@@ -308,7 +311,7 @@ class PSM():             # Postfix Stack Macine
         pass
     # покласти результат на стек
     if arthBoolOp in ('<','<=','>','>=','=','<>'):
-      self.stack.push((str(value),'bool'))
+      self.stack.push((str(value),'boolval'))
     else: 
       self.stack.push((str(value),typeL))
 
@@ -318,7 +321,7 @@ class PSMExcept(Exception):
     self.msg = msg
     
 pm1=PSM() 
-pm1.loadPostfixFile("test.postfix")  #  завантаження .postfix - файла
+pm1.loadPostfixFile("test1")  #  завантаження .postfix - файла
 
 
 print('postfixExec:')

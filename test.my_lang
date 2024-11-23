@@ -1,14 +1,12 @@
 a ^ int
 v ^ int
 begin
-a = 7
-v = (5.4 + 3.1)/a
 
-a = true
+a=1
+v=5
 
-if v > 8
-  puts 5
-  puts 5
+if a > 8
+  puts 1
 else
   puts 3
 end
