@@ -2,32 +2,25 @@
 .version: 0.2
 
 .vars(
-   a     int        
+   a     boolval    
    v     int        
 )
 
 .labels(
-   m1    13 
-   m2    15 
+   m1     8 
+   m2    10 
 )
 
 .constants(
 1     int        
-5     int        
-8     int        
 3     int        
 )
 
 .code(
    a     l-val 
-   1     int   
-   =     assign_op
-   v     l-val 
-   5     int   
+   false boolval
    =     assign_op
    a     r-val 
-   >     rel_op
-   8     int   
    m1    label 
    JF    jf    
    m2    label 

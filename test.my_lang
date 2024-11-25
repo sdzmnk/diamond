@@ -1,11 +1,10 @@
-a ^ int
+a ^ boolval
 v ^ int
 begin
 
-a=1
-v=5
+a=false
 
-if a > 8
+if a
   puts 1
 else
   puts 3

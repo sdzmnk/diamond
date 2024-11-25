@@ -1214,6 +1214,10 @@ def parseOut():
         if next_tok == 'int':
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
             res = True
+            #
+            # postfixCodeGen('out_op', (next_lex,'out_op'))
+            # if toView: configToPrint(next_lex, numRow)
+
             numRow += 1  # Переходимо до наступної лексеми
 
         elif next_tok == 'punct' and next_lex == '"':
