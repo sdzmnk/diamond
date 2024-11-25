@@ -303,14 +303,14 @@ class PSM():             # Postfix Stack Macine
       value = str(valL > valR).lower()
     elif arthBoolOp == '>=':
       value = str(valL >= valR).lower()
-    elif arthBoolOp == '=':
+    elif arthBoolOp == '==':
       value = str(valL == valR).lower()
     elif arthBoolOp == '<>':
       value = str(valL != valR).lower()
     else:
         pass
     # покласти результат на стек
-    if arthBoolOp in ('<','<=','>','>=','=','<>'):
+    if arthBoolOp in ('<','<=','>','>=','==','<>'):
       self.stack.push((str(value),'boolval'))
     else: 
       self.stack.push((str(value),typeL))

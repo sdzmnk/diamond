@@ -1,13 +1,19 @@
 a ^ boolval
 v ^ int
+b ^ int
+c ^ int
 begin
 
 a=false
+b=4
+a=b>1
 
-if a
-  puts 1
+if b==1
+  v=1
+elif b==3
+    v=26
 else
-  puts 3
+  v=4
 end
 
 finish

@@ -4,29 +4,46 @@
 .vars(
    a     boolval    
    v     int        
+   b     int        
+   c     int        
 )
 
 .labels(
-   m1     8 
-   m2    10 
+   m1  val_undef 
+   m2    24 
 )
 
 .constants(
-1     int        
 3     int        
+1     int        
+4     int        
 )
 
 .code(
    a     l-val 
    false boolval
    =     assign_op
-   a     r-val 
+   b     l-val 
+   3     int   
+   =     assign_op
+   a     l-val 
+   b     r-val 
+   1     int   
+   >     rel_op
+   =     assign_op
+   b     r-val 
+   1     int   
+   ==    rel_op
    m1    label 
    JF    jf    
+   v     l-val 
+   1     int   
+   =     assign_op
    m2    label 
    JMP   jump  
-   m1    label 
-   :     colon 
+   v     l-val 
+   4     int   
+   =     assign_op
    m2    label 
    :     colon 
 )

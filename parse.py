@@ -475,7 +475,9 @@ def parseAssign():
     numLineT, lexT, tokT = getSymb()
     lType = getTypeVar(lex)
 
+
     postfixCodeGen('lval', (lex, tok))
+
     if toView: configToPrint(lex, numRow)
 
     if lType == 'undeclared_variable':
@@ -506,7 +508,9 @@ def parseAssign():
 
                 rType = parseExpression()  # Продовжуємо обробку всього виразу
 
+
                 postfixCodeGen(tokNext, (lexNext, tokNext))
+
                 if toView: configToPrint(lexNext, numLineNext)
 
                 resType = getTypeOp(lTypebrac, '+', rType)
@@ -523,6 +527,8 @@ def parseAssign():
                 if resType == 'type_error':
                     failParse(resType, (numLine, lexN,))
                 res = True
+
+
             postfixCodeGen(lexT, (lexT, tokT))
             if toView: configToPrint(lex, numRow)
 
@@ -531,6 +537,7 @@ def parseAssign():
             rType = parseExpression()
             resType = getTypeOp(lType, '=', rType)
             tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип
+
 
             postfixCodeGen(lexT, (lexT, tokT))
             if toView: configToPrint(lex, numRow)
@@ -979,9 +986,9 @@ def parseIf():
                 m2 = createLabel()
                 postfixCode.append(m2)
                 postfixCode.append(('JMP', 'jump'))
-                setValLabel(m1)
-                postfixCode.append(m1)
-                postfixCode.append((':', 'colon'))
+                # setValLabel(m1)
+                # postfixCode.append(m1)
+                # postfixCode.append((':', 'colon'))
 
                 # Перевіряємо, чи було створено мітку m5
                 if m5:
@@ -1179,11 +1186,11 @@ def parseBoolExpr():
         numLine, lex, tok = getSymb()  # Зчитуємо наступний токен
         if tok == 'rel_op':  # Очікуємо відношення
             print(indent + f'в рядку {numLine} - токен {lex, tok}')
-            postfixCode.append((lex, tok))  # Додаємо в постфікс
             numRow += 1
             parseTerm()  # Розбираємо терм після rel_op
+            postfixCode.append((lex, tok))  # Додаємо в постфікс
         elif tok in ('id', 'int', 'float', 'true', 'false', '('):  # Якщо це допустимий завершальний токен
-            postfixCode.append((lex, tok))
+            # postfixCode.append((lex, tok))
             F = False
         else:  # Якщо нічого не підходить, завершуємо
             failParse('mismatch in BoolExpr', (numLine, lex, tok, 'rel_op'))
@@ -1213,6 +1220,10 @@ def parseOut():
 
         if next_tok == 'int':
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
+
+            postfixCode.append((next_lex, 'r-val'))
+            postfixCode.append(('OUT', 'out_op'))
+
             res = True
             #
             # postfixCodeGen('out_op', (next_lex,'out_op'))
@@ -1230,6 +1241,7 @@ def parseOut():
         elif (next_tok == 'punct' or next_tok == 'add_op' or next_tok == 'mult_op'
               or next_tok == 'rel_op' or next_tok == 'assign_op' or next_tok == 'sharp' or next_tok == 'brackets_op'):
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
+
             res = True
             numRow += 1  # Переходимо до наступної лексеми
         else:
