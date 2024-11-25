@@ -976,6 +976,7 @@ def parseIf():
                 m5 = createLabel()
                 postfixCode.append(m5)
                 postfixCode.append(('JF', 'jf'))
+
                 setValLabel(m1)
                 postfixCode.append(m1)
                 postfixCode.append((':', 'colon'))
@@ -986,9 +987,10 @@ def parseIf():
                 m2 = createLabel()
                 postfixCode.append(m2)
                 postfixCode.append(('JMP', 'jump'))
-                # setValLabel(m1)
-                # postfixCode.append(m1)
-                # postfixCode.append((':', 'colon'))
+
+                setValLabel(m1)
+                postfixCode.append(m1)
+                postfixCode.append((':', 'colon'))
 
                 # Перевіряємо, чи було створено мітку m5
                 if m5:
@@ -1005,6 +1007,7 @@ def parseIf():
                 break
 
         parseToken('end', 'keyword')
+
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))

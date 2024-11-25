@@ -9,13 +9,15 @@
 )
 
 .labels(
-   m1  val_undef 
-   m2    24 
+   m1    31 
+   m2    33 
+   m3    38 
 )
 
 .constants(
-3     int        
 1     int        
+3     int        
+26    int        
 4     int        
 )
 
@@ -24,7 +26,7 @@
    false boolval
    =     assign_op
    b     l-val 
-   3     int   
+   1     int   
    =     assign_op
    a     l-val 
    b     r-val 
@@ -39,11 +41,25 @@
    v     l-val 
    1     int   
    =     assign_op
+   b     r-val 
+   3     int   
+   ==    rel_op
    m2    label 
+   JF    jf    
+   m1    label 
+   :     colon 
+   v     l-val 
+   26    int   
+   =     assign_op
+   m3    label 
    JMP   jump  
+   m1    label 
+   :     colon 
+   m2    label 
+   :     colon 
    v     l-val 
    4     int   
    =     assign_op
-   m2    label 
+   m3    label 
    :     colon 
 )
