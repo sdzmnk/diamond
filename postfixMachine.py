@@ -158,9 +158,12 @@ class PSM():             # Postfix Stack Macine
         elif tok == 'inp_op':
           self.printOp(lex,tok)
           # введення з клавіатури
-          # зняти зі стека (id,'l-val') 
-          id, _ = self.stack.pop() #  
+          # зняти зі стека (id,'l-val')
+
+          id, _ = self.stack.pop() #
           typeVar = self.tableOfId[id][1]
+
+
           if typeVar == 'int':
             tmpVal = int(input(f'\nВведіть значення типу {typeVar}: {id}='))
           elif typeVar == 'float': 

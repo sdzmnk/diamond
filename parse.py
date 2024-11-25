@@ -371,17 +371,23 @@ def parseInp():
         parseToken('.', 'punct')
         numLine, lex, tok = getSymb()
         if lex == 'to_i':
+
             parseToken('to_i', 'keyword')
             resType = 'int'
+            postfixCode.append(('INP', 'inp_op'))
             res = True
         elif lex == 'to_f':
+
             parseToken('to_f', 'keyword')
             resType = 'float'
+            postfixCode.append(('INP', 'inp_op'))
             res = True
+
         else:
             numLine, lex, tok = getSymb()
             failParse('невідповідність інструкцій', (numLine, lex, tok, 'to_i або to_f'))
             res = False
+
     else:
         res = False
     indent = predIndt()
@@ -661,6 +667,7 @@ def parseSwitch():
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
+
     if lex == 'switch' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
@@ -947,67 +954,147 @@ def parseFactor():
 # #     indent = predIndt()
 # #     return resType, res
 
+# def parseIf():
+#     global numRow
+#     # відступ збільшити
+#     indent = nextIndt()
+#     numLine, lex, tok = getSymb()
+#     resType = None
+#
+#     if lex == 'if' and tok == 'keyword':
+#         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#         numRow += 1
+#         parseBoolExpr()
+#
+#         m1 = createLabel()
+#         postfixCode.append(m1)
+#         postfixCode.append(('JF', 'jf'))
+#
+#         parseStatementList()  # Виконуємо парсинг блоку if
+#
+#         m5 = None  # Ініціалізуємо змінну мітки для elif
+#         while True:
+#             numLine, lex, tok = getSymb()
+#             if lex == 'elif' and tok == 'keyword':
+#                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#                 numRow += 1
+#                 parseBoolExpr()  # Парсинг логічного виразу в elif
+#
+#                 m5 = createLabel()
+#                 postfixCode.append(m5)
+#                 postfixCode.append(('JF', 'jf'))
+#
+#                 setValLabel(m1)
+#                 postfixCode.append(m1)
+#                 postfixCode.append((':', 'colon'))
+#
+#                 parseStatementList()  # Парсинг блоку elif
+#
+#             elif lex == 'else' and tok == 'keyword':
+#                 m2 = createLabel()
+#                 postfixCode.append(m2)
+#                 postfixCode.append(('JMP', 'jump'))
+#
+#                 setValLabel(m1)
+#                 postfixCode.append(m1)
+#                 postfixCode.append((':', 'colon'))
+#
+#                 # Перевіряємо, чи було створено мітку m5
+#                 if m5:
+#                     setValLabel(m5)
+#                     postfixCode.append(m5)
+#                     postfixCode.append((':', 'colon'))
+#
+#                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#                 numRow += 1
+#                 parseStatementList()  # Парсинг блоку else
+#                 break  # Вийти з циклу після обробки else
+#             else:
+#                 # Якщо токен не elif або else, повертаємося до завершення if
+#                 break
+#
+#         parseToken('end', 'keyword')
+#
+#         setValLabel(m2)
+#         postfixCode.append(m2)
+#         postfixCode.append((':', 'colon'))
+#         res = True
+#     else:
+#         res = False
+#
+#     # перед поверненням - зменшити відступ
+#     indent = predIndt()
+#     return resType, res
+
 def parseIf():
     global numRow
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
     resType = None
+    m1 = createLabel()
+    m2 = createLabel()
 
     if lex == 'if' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
         parseBoolExpr()
 
-        m1 = createLabel()
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
 
         parseStatementList()  # Виконуємо парсинг блоку if
 
+        postfixCode.append(m2)
+        postfixCode.append(('JMP', 'jump'))
+
         m5 = None  # Ініціалізуємо змінну мітки для elif
         while True:
             numLine, lex, tok = getSymb()
+            setValLabel(m1)
+            postfixCode.append(m1)
+            postfixCode.append((':', 'colon'))
             if lex == 'elif' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
                 numRow += 1
+
                 parseBoolExpr()  # Парсинг логічного виразу в elif
 
-                m5 = createLabel()
-                postfixCode.append(m5)
+                # m5 = createLabel()
+                m1 = createLabel()
+                postfixCode.append(m1)
                 postfixCode.append(('JF', 'jf'))
 
-                setValLabel(m1)
-                postfixCode.append(m1)
-                postfixCode.append((':', 'colon'))
-
                 parseStatementList()  # Парсинг блоку elif
-
-            elif lex == 'else' and tok == 'keyword':
-                m2 = createLabel()
                 postfixCode.append(m2)
                 postfixCode.append(('JMP', 'jump'))
 
-                setValLabel(m1)
-                postfixCode.append(m1)
-                postfixCode.append((':', 'colon'))
 
-                # Перевіряємо, чи було створено мітку m5
-                if m5:
-                    setValLabel(m5)
-                    postfixCode.append(m5)
-                    postfixCode.append((':', 'colon'))
+            # elif lex == 'else' and tok == 'keyword':
 
-                print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-                numRow += 1
-                parseStatementList()  # Парсинг блоку else
-                break  # Вийти з циклу після обробки else
+            # setValLabel(m1)
+            # postfixCode.append(m1)
+            # postfixCode.append((':', 'colon'))
+
+            # Перевіряємо, чи було створено мітку m5
+            # if m5:
+            #    setValLabel(m5)
+            #    postfixCode.append(m5)
+            #    postfixCode.append((':', 'colon'))
+
+            #    print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+            #    numRow += 1
+            #    parseStatementList()  # Парсинг блоку else
+            #    break  # Вийти з циклу після обробки else
             else:
                 # Якщо токен не elif або else, повертаємося до завершення if
                 break
-
+        numLine, lex, tok = getSymb()
+        if lex == 'else' and tok == 'keyword':
+            print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+            numRow += 1
+            parseStatementList()
         parseToken('end', 'keyword')
-
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
@@ -1025,13 +1112,32 @@ def parseWhile():
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
+
+    m1 = createLabel()
+    m2 = createLabel()
+
     if lex == 'while' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
+
+        setValLabel(m2)
+        postfixCode.append(m2)
+        postfixCode.append((':', 'colon'))
         parseBoolExpr()
+
+        postfixCode.append(m1)
+        postfixCode.append(('JF', 'jf'))
+
         parseToken('do', 'keyword')
+
         parseStatementList()
+        postfixCode.append(m2)
+        postfixCode.append(('JMP', 'jump'))
+
         parseToken('end', 'keyword')
+        setValLabel(m1)
+        postfixCode.append(m1)
+        postfixCode.append((':', 'colon'))
         res = True
     else:
         res = False
@@ -1044,15 +1150,43 @@ def parseUntil():
     global numRow
     # відступ збільшити
     indent = nextIndt()
+    m1 = createLabel()
+    m2 = createLabel()
+    m3 = createLabel()
 
     numLine, lex, tok = getSymb()
     if lex == 'until' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
+
+        setValLabel(m2)
+        postfixCode.append(m2)
+        postfixCode.append((':', 'colon'))
+
         parseBoolExpr()
+
+        postfixCode.append(m1)
+        postfixCode.append(('JF', 'jf'))
+
+        postfixCode.append(m3)
+        postfixCode.append(('JMP', 'jump'))
+
         parseToken('do', 'keyword')
+
+        setValLabel(m1)
+        postfixCode.append(m1)
+        postfixCode.append((':', 'colon'))
+
         parseStatementList()
+
+        postfixCode.append(m2)
+        postfixCode.append(('JMP', 'jump'))
+
+
         parseToken('end', 'keyword')
+        setValLabel(m3)
+        postfixCode.append(m3)
+        postfixCode.append((':', 'colon'))
         res = True
     else:
         res = False
@@ -1224,7 +1358,7 @@ def parseOut():
         if next_tok == 'int':
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (next_lex, next_tok)))
 
-            postfixCode.append((next_lex, 'r-val'))
+            postfixCode.append((next_lex, 'int'))
             postfixCode.append(('OUT', 'out_op'))
 
             res = True
@@ -1236,8 +1370,15 @@ def parseOut():
 
         elif next_tok == 'punct' and next_lex == '"':
             parseToken(next_lex, next_tok)
+
+            # postfixCode.append((next_lex, 'r-val'))
+            # postfixCode.append(('OUT', 'out_op'))
             # Перевіряємо на ідентифікатор всередині лапок
+            numLineO, lexO, tokO = getSymb()
+
             if parseIdent():
+                postfixCode.append((lexO, 'r-val'))
+                postfixCode.append(('OUT', 'out_op'))
                 # Перевіряємо на закриваючі лапки
                 if parseToken('"', 'punct'):
                     res = True

@@ -1,19 +1,49 @@
-a ^ boolval
 v ^ int
 b ^ int
 c ^ int
+k ^ int
+s ^ int
+u ^ int
+w ^ int
+inp1 ^ int
+inp2 ^ float
 begin
 
-a=false
-b=1
-a=b>1
+
+b=3
+c=3
+k=0
+v=0
+s=1
+u=0
+w=0
 
 if b==1
-  v=1
+    if c==1
+        k=11
+    elif c==2
+        k=22
+    else
+        k=33
+    end
 elif b==3
-    v=26
+    v=2
 else
   v=4
 end
+
+while w < 5 do
+  w = w + 1
+end
+
+until u == 10 do
+  u = u + 2
+end
+
+puts 1
+puts "u"
+
+inp1 = gets.to_i
+inp2 = gets.to_f
 
 finish
