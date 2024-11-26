@@ -288,7 +288,7 @@ class PSM():             # Postfix Stack Macine
       value = valL / valR
     elif arthBoolOp == '/' and typeL=='int':
       value = int(valL / valR)
-    elif arthBoolOp == '^':
+    elif arthBoolOp == '**':
       val = pow(valL, valR)
       if isinstance(val,complex):
         exit(f'Значенням {valL}^{valR} є комплексне число {val}')

@@ -10,6 +10,9 @@ inp2 ^ float
 i1 ^ int
 i2 ^ int
 i3 ^ int
+sw1 ^ int
+sw2 ^ int
+sw3 ^ int
 begin
 
 
@@ -50,5 +53,10 @@ inp1 = gets.to_i
 inp2 = gets.to_f
 
 i1, i2, i3 = 1, 2, 3
+
+sw1 = -2
+
+sw2 = 2**3
+
 
 finish

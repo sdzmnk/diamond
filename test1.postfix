@@ -14,6 +14,9 @@
    i1    int        
    i2    int        
    i3    int        
+   sw1   int        
+   sw2   float      
+   sw3   int        
 )
 
 .labels(
@@ -172,5 +175,14 @@
    =     assign_op
    i3    l-val 
    3     int   
+   =     assign_op
+   sw1   l-val 
+   2     int   
+   NEG   neg_op
+   =     assign_op
+   sw2   l-val 
+   2     int   
+   3     int   
+   **    pow_op
    =     assign_op
 )

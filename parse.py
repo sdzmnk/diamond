@@ -598,10 +598,13 @@ def parseExpression():
     F = True
     while F:
         numLineT, lexT, tokT = getSymb()
+        print(lexT + ' jjj')
+
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
 
             numRow += 1
             numLineR, lexR, tokR = getSymb()
+
 
             print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
             rType = parseTerm()
@@ -625,8 +628,13 @@ def parseExpression():
                 tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
                 failParse(resType, tpl)
 
-            postfixCodeGen(lexT, (lexT, tokT))
-            if toView: configToPrint(lexT, numLineT)
+            if tokT == 'pow_op':
+                postfixCodeGen('**', ('**', 'pow_op'))
+                if toView: configToPrint(lexT, numLineT)
+
+            elif tokT != 'pow_op':
+                postfixCodeGen(lexT, (lexT, tokT))
+                if toView: configToPrint(lexT, numLineT)
 
         else:
             F = False
@@ -674,11 +682,14 @@ def parseSwitch():
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
+    m1 = createLabel()
+    m2 = createLabel()
 
     if lex == 'switch' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
         parseDigit() or parseIdent()
+
         parseToken('do', 'keyword')
         while parseCaseBlock():
             pass  # Виконуємо парсинг блоків case, поки це можливо
@@ -841,13 +852,21 @@ def parseFactor():
     # Обробка унарних операторів
     if tok == 'add_op' and lex in ('+', '-'):  # Якщо це '+' або '-'
         unary_op = lex  # Зберігаємо оператор
+
         numRow += 1  # Переходимо до наступної лексеми
         numLine, lex, tok = getSymb()  # Отримуємо наступну лексему
 
         if tok in ('int', 'float'):  # Якщо наступна лексема - число
             if unary_op == '-':
+
+                postfixCodeGen(lex, (lex, tok))
+                if toView: configToPrint(lex, numLine)
+                postfixCode.append(('NEG', 'neg_op'))
+
                 lex = str(-float(lex)) if '.' in lex else str(-int(lex))  # Застосовуємо унарний мінус
+
             elif unary_op == '+':
+
                 lex = str(float(lex)) if '.' in lex else str(int(lex))  # Унарний плюс не змінює значення
             numRow += 1  # Переходимо до наступної лексеми
             print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
