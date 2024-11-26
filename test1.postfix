@@ -11,6 +11,9 @@
    w     int        
    inp1  int        
    inp2  float      
+   i1    int        
+   i2    int        
+   i3    int        
 )
 
 .labels(
@@ -161,4 +164,13 @@
    INP   inp_op
    inp2  l-val 
    INP   inp_op
+   i1    l-val 
+   1     int   
+   =     assign_op
+   i2    l-val 
+   2     int   
+   =     assign_op
+   i3    l-val 
+   3     int   
+   =     assign_op
 )

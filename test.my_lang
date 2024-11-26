@@ -7,6 +7,9 @@ u ^ int
 w ^ int
 inp1 ^ int
 inp2 ^ float
+i1 ^ int
+i2 ^ int
+i3 ^ int
 begin
 
 
@@ -45,5 +48,7 @@ puts "u"
 
 inp1 = gets.to_i
 inp2 = gets.to_f
+
+i1, i2, i3 = 1, 2, 3
 
 finish

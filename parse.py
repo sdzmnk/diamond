@@ -393,15 +393,19 @@ def parseInp():
     indent = predIndt()
     return resType, res
 
+global lex10,tok10
 
 def parseDeclaration():
     global numRow
+    global lex10,tok10
     indent = nextIndt()
     print(indent + 'parseDeclaration():')
-    numLine, lex, tok = getSymb()
-
+    numLine10, lex10, tok10 = getSymb()
     resType = None
     # Розбираємо ідентифікатори з лівого боку присвоєння
+    numLine11, lex11, tok11 = getSymb()
+    # postfixCodeGen('lval', (lex11, tok11))
+    # postfixCodeGen('=', ('=', 'assign_op'))
     lType = parseIdentList()  # Отримуємо список ідентифікаторів
 
     # Переконатися, що токен '=' правильно розібраний
@@ -412,22 +416,25 @@ def parseDeclaration():
 
     # Перевіряємо, чи кількість ідентифікаторів відповідає кількості виразів
     if len(lType) != len(rType):
-        failParse('кількість ідентифікаторів не дорівнює кількості значень', (numLine))
+        failParse('кількість ідентифікаторів не дорівнює кількості значень', (numLine10))
 
     # Обробка пар ідентифікаторів і виразів
     i = 0
-    n = 2
+    n1 = int(tableOfVar[lex10][0])
     while i < len(lType):  # Проходимо по всіх ідентифікаторах
         # Отримуємо тип операції
         resType = getTypeOp(lType[i], '=', rType[i])
 
         # Оновлення таблиці змінних для поточного ідентифікатора
-        tableOfVar[lex] = (n, resType, 'assigned')
-        n += 1
+        tableOfVar[lex10] = (n1, resType, 'assigned')
+        n1 += 1
         # Отримання наступного ключа після поточного
-        next_lex = get_next_key(tableOfVar, lex)
+        next_lex = get_next_key(tableOfVar, lex10)
         if next_lex:
             lex = next_lex  # Оновлюємо lex на наступний ключ
+            lex10 = lex
+            # postfixCodeGen('lval', (lex10, tok10))
+            # postfixCodeGen('=', ('=', 'assign_op'))
         else:
             break  # Якщо наступного ключа немає, припиняємо цикл
 
@@ -554,6 +561,7 @@ def parseAssign():
     elif lexT == ',':
         parseToken(',', 'punct')
         parseDeclaration()
+        # postfixCodeGen('=', ('=', 'assign_op'))
         type = tableOfConst[firstNumber][0]
         resType = getTypeOp(lex, '=', type)
         tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
@@ -575,7 +583,6 @@ def parseExpression():
     print(indent + 'parseExpression():')
     numLine, lex, tok = getSymb()
     lType = parseTerm()
-    # print(lex)
     if lType == 'id':
         lType = getTypeVar(lex)
         if lType == 'undeclared_variable':
@@ -1402,6 +1409,7 @@ def parseOut():
 
 def parseIdentList():
     global numRow
+    global lex10
     indent = nextIndt()  # Збільшуємо відступ для виводу
     print(indent + 'parseIdentList():')  # Виводимо назву функції
     resType = []  # Ініціалізуємо порожній список для збереження ідентифікаторів
@@ -1411,6 +1419,7 @@ def parseIdentList():
 
     # Поки є символи коми, продовжуємо розбір ідентифікаторів
     while True:
+
         numLine, lex, tok = getSymb()  # Отримуємо наступний токен
 
         if tok == 'punct' and lex == ',':
@@ -1428,23 +1437,31 @@ firstNumber = 1
 def parseExpressionList():
     global numRow
     global firstNumber
+    global lex10
     numLine, lex, tok = getSymb()
     indent = nextIndt()  # Збільшуємо відступ для виводу
     print(indent + 'parseExpressionList():')  # Виводимо назву функції
 
     resType = []  # Ініціалізуємо список для збереження типів виразів
     firstNumber = lex  # Зберігаємо значення першого виразу
-
     # Розбираємо перше вираження, але не додаємо до списку
+
     parseExpression()
 
+    postfixCodeGen('=', ('=', 'assign_op'))
     # Поки є символи коми, продовжуємо розбір виражень
     while True:
         numLine, lex, tok = getSymb()  # Отримуємо наступний токен
-
         if tok == 'punct' and lex == ',':
+            postfixCodeGen('lval', (lex10, tok10))
             parseToken(',', 'punct')  # Розбираємо кому
             resType.append(parseExpression())  # Додаємо наступний вираз до списку
+            i = int(tableOfVar[lex10][0]) + 1
+            for key, value in tableOfVar.items():
+                if value[0] == i:  # Якщо перший елемент кортежу дорівнює i
+                    lex10 = key
+                    break
+            postfixCodeGen('=', ('=', 'assign_op'))
         else:
             # Якщо токен не кома, виходимо з циклу
             break
