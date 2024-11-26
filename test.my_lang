@@ -13,6 +13,7 @@ i3 ^ int
 sw1 ^ int
 sw2 ^ int
 sw3 ^ int
+sw4 ^ int
 begin
 
 
@@ -52,11 +53,18 @@ puts "u"
 inp1 = gets.to_i
 inp2 = gets.to_f
 
-i1, i2, i3 = 1, 2, 3
+i1, i2, i3 = 1, 2, 9
 
 sw1 = -2
 
 sw2 = 2**3
 
+sw3 = 8
+sw4 = 0
+
+for sw1 in [6 .. 7] do
+  sw4 = sw4 + 1
+  puts "sw4"
+end
 
 finish

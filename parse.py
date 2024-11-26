@@ -598,7 +598,6 @@ def parseExpression():
     F = True
     while F:
         numLineT, lexT, tokT = getSymb()
-        print(lexT + ' jjj')
 
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
 
@@ -1241,92 +1240,113 @@ def parseUntil():
 #     indent = predIndt()
 #     return res
 
+global firstLex,firstTok
+global secondLex, secondTok
 def parseFor():
-    global numRow, postfixCode
+    global numRow, postfixCode, firstLex, secondLex, secondTok
     indent = nextIndt()
     print(indent + 'parseFor():')
 
-    # Очікуємо "for"
+    m1 = createLabel()  # Мітка для тіла циклу
+    m2 = createLabel()  # Мітка для перевірки умови циклу
+    m3 = createLabel()  # Мітка для завершення циклу
+
     numLine, lex, tok = getSymb()
     if lex == 'for' and tok == 'keyword':
-        print(indent + f'в рядку {numLine} - токен {lex, tok}')
+        print(indent + f'в рядку {numLine} - токен ({lex}, {tok})')
 
         numRow += 1
 
-        # Очікуємо змінну (Prm)
-        parseIdent()
-        Prm = postfixCode[-1][0]  # Отримати ідентифікатор змінної
+        # Стартове значення змінної
+        numLine1, lex1, tok1 = getSymb()
+        postfixCodeGen('lval', (lex1, tok1))  # Записуємо значення лівої частини
+        if toView: configToPrint(lex1, numLine1)
 
-        parseToken('in', 'keyword')
+        parseIdent()  # Парсимо ідентифікатор
 
-        # Очікуємо діапазон (StartExpr і TargetExpr)
-        parseRange()
-        StartExpr, TargetExpr = postfixCode[-2:]  # Останні два елементи діапазону
+        parseToken('in', 'keyword')  # Парсимо ключове слово 'in'
+        parseRange()  # Парсимо діапазон
 
-        parseToken('do', 'keyword')
+        # Генерація коду для правої частини
+        if firstTok == 'id':
+            postfixCodeGen('rval', (firstLex, firstTok))
+        else:
+            postfixCodeGen(firstTok, (firstLex, firstTok))
+        postfixCodeGen('=', ('=', 'assign_op'))  # Присвоєння значення
 
-        # Додати ПОЛІЗ для початкового присвоєння Prm
-        postfixCode.append((StartExpr[0], 'r-val'))
-        postfixCode.append((Prm, 'l-val'))
-        postfixCode.append(('=', 'assign_op'))
-
-        # Мітка початку циклу (m1)
-        m3 = createLabel()
-        setValLabel(m3)
-        postfixCode.append((':','colon'))
-
-        # Додати ПОЛІЗ для перевірки межі
-        postfixCode.append((Prm, 'r-val'))
-        postfixCode.append((TargetExpr[0], 'r-val'))
-        postfixCode.append(('<=', 'rel_op'))
-
-        # Мітка виходу з циклу (m2)
-        m4 = createLabel()
-        postfixCode.append(m4)
-        postfixCode.append(('JF', 'jf'))
-
-        # Трансляція тіла циклу
-        parseStatementList()
-
-        # Додати крок StepExpr (якщо не задано, вважається 1)
-        postfixCode.append((Prm, 'r-val'))
-        postfixCode.append((1, 'int'))  # За замовчуванням крок = 1
-        postfixCode.append(('+', 'add_op'))
-        postfixCode.append((Prm, 'l-val'))
-        postfixCode.append(('=', 'assign_op'))
-
-        # Повернення до мітки початку циклу
-        postfixCode.append(m3)
-        postfixCode.append(('JMP', 'jump'))
-
-        # Мітка завершення циклу
-        setValLabel(m4)
-        postfixCode.append(m4)
+        # Мітка для перевірки умови циклу
+        setValLabel(m2)
+        postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
 
-        parseToken('end', 'keyword')
+        # Генерація коду для правої частини умови циклу
+        if secondTok == 'id':
+            postfixCodeGen('rval', (secondLex, secondTok))
+        else:
+            postfixCodeGen(secondTok, (secondLex, secondTok))
+
+        postfixCodeGen('rval', (lex1, tok1))  # Записуємо значення правої частини
+        if toView: configToPrint(lex1, numLine1)
+        postfixCodeGen('>=', ('>=', 'rel_op'))  # Оператор порівняння
+
+        postfixCode.append(m1)  # Мітка для переходу
+        postfixCode.append(('JF', 'jf'))  # Перехід, якщо умова не виконується
+
+        # Обробка тіла циклу
+        parseToken('do', 'keyword')  # Парсимо 'do'
+
+        parseStatementList()  # Парсимо список операторів у тілі циклу
+
+        postfixCodeGen('lval', (lex1, tok1))
+        postfixCodeGen('rval', (lex1, tok1))
+        postfixCodeGen('1', ('1', 'int'))
+        postfixCodeGen('+', ('+', 'add_op'))
+        postfixCodeGen('=', ('=', 'assign_op'))  # Оновлення лічильника циклу
+
+        postfixCode.append(m2)  # Повернення до перевірки умови циклу
+        postfixCode.append(('JMP', 'jump'))  # Перехід до перевірки умови циклу
+
+        # Завершення циклу
+        parseToken('end', 'keyword')  # Парсимо 'end'
+
+        # Завершення циклу
+        setValLabel(m1)
+        postfixCode.append(m1)
+        postfixCode.append((':', 'colon'))  # Мітка завершення циклу
+
+        res = True
     else:
         failParse('Expected "for"', (numLine, lex, tok))
 
+    # Повернення відступу
     indent = predIndt()
+    return res
+
+
 
 
 def parseRange():
     global numRow
+    global firstLex,firstTok, secondLex,secondTok
     indent = nextIndt()
     print(indent + 'parseRange():')
 
     # Очікувати лексему '['
     parseToken('[', 'brackets_op')
-
+    numLine, lex, tok = getSymb()
+    firstLex = lex
+    firstTok = tok
     # Розбирати перше значення діапазону
-    parseExpression()
-
+    parseDigit() or parseIdent()
     # Очікувати лексему '..' для визначення діапазону
     parseToken('..', 'range_op')
 
+    numLine, lex, tok = getSymb()
+    secondLex = lex
+    secondTok = tok
+
     # Розбирати друге значення діапазону
-    parseExpression()
+    parseDigit() or parseIdent()
 
     # Очікувати лексему ']'
     parseToken(']', 'brackets_op')

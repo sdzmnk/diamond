@@ -17,6 +17,7 @@
    sw1   int        
    sw2   float      
    sw3   int        
+   sw4   int        
 )
 
 .labels(
@@ -31,6 +32,9 @@
    m9   101 
    m10   92 
    m11  110 
+   m12  168 
+   m13  147 
+   m14 val_undef 
 )
 
 .constants(
@@ -44,6 +48,10 @@
 4     int        
 5     int        
 10    int        
+9     int        
+8     int        
+6     int        
+7     int        
 )
 
 .code(
@@ -174,7 +182,7 @@
    2     int   
    =     assign_op
    i3    l-val 
-   3     int   
+   9     int   
    =     assign_op
    sw1   l-val 
    2     int   
@@ -185,4 +193,36 @@
    3     int   
    **    pow_op
    =     assign_op
+   sw3   l-val 
+   8     int   
+   =     assign_op
+   sw4   l-val 
+   0     int   
+   =     assign_op
+   sw1   l-val 
+   6     int   
+   =     assign_op
+   m13   label 
+   :     colon 
+   7     int   
+   sw1   r-val 
+   >=    rel_op
+   m12   label 
+   JF    jf    
+   sw4   l-val 
+   sw4   r-val 
+   1     int   
+   +     add_op
+   =     assign_op
+   sw4   r-val 
+   OUT   out_op
+   sw1   l-val 
+   sw1   r-val 
+   1     int   
+   +     add_op
+   =     assign_op
+   m13   label 
+   JMP   jump  
+   m12   label 
+   :     colon 
 )
