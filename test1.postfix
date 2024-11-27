@@ -18,6 +18,7 @@
    sw2   float      
    sw3   int        
    sw4   int        
+   a     int        
 )
 
 .labels(
@@ -32,9 +33,19 @@
    m9   101 
    m10   92 
    m11  110 
-   m12  168 
-   m13  147 
+   m12  164 
+   m13  143 
    m14 val_undef 
+   m15 val_undef 
+   m16 val_undef 
+   m17  178 
+   m18  180 
+   m19  191 
+   m20  193 
+   m21  204 
+   m22  206 
+   m23 val_undef 
+   m24 val_undef 
 )
 
 .constants(
@@ -52,6 +63,9 @@
 8     int        
 6     int        
 7     int        
+166   int        
+266   int        
+366   int        
 )
 
 .code(
@@ -171,10 +185,6 @@
    OUT   out_op
    u     r-val 
    OUT   out_op
-   inp1  l-val 
-   INP   inp_op
-   inp2  l-val 
-   INP   inp_op
    i1    l-val 
    1     int   
    =     assign_op
@@ -224,5 +234,47 @@
    m13   label 
    JMP   jump  
    m12   label 
+   :     colon 
+   a     l-val 
+   2     int   
+   =     assign_op
+   a     r-val 
+   1     int   
+   ==    rel_op
+   m17   label 
+   JF    jf    
+   166   int   
+   OUT   out_op
+   m18   label 
+   JMP   jump  
+   m17   label 
+   :     colon 
+   m18   label 
+   :     colon 
+   a     r-val 
+   2     int   
+   ==    rel_op
+   m19   label 
+   JF    jf    
+   266   int   
+   OUT   out_op
+   m20   label 
+   JMP   jump  
+   m19   label 
+   :     colon 
+   m20   label 
+   :     colon 
+   a     r-val 
+   3     int   
+   ==    rel_op
+   m21   label 
+   JF    jf    
+   366   int   
+   OUT   out_op
+   m22   label 
+   JMP   jump  
+   m21   label 
+   :     colon 
+   m22   label 
    :     colon 
 )

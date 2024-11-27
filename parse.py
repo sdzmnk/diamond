@@ -676,24 +676,43 @@ def parseIdent():
     indent = predIndt()
     return res
 
+global lexCase, tokCase
+
+
 def parseSwitch():
-    global numRow
+    global numRow, lexCase, tokCase
     # відступ збільшити
     indent = nextIndt()
     numLine, lex, tok = getSymb()
-    m1 = createLabel()
-    m2 = createLabel()
+
+    m1 = createLabel()  # Мітка для початку switch
+    m2 = createLabel()  # Мітка для завершення switch
+    m3 = createLabel()  # Мітка для початку switch
+
+
+    res = None
 
     if lex == 'switch' and tok == 'keyword':
-        print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+        print(indent + f'в рядку {numLine} - токен {(lex, tok)}')
         numRow += 1
+
+        numLine1, lex1, tok1 = getSymb()
+
+        lexCase = lex1
+        tokCase = tok1
+
         parseDigit() or parseIdent()
 
         parseToken('do', 'keyword')
+
         while parseCaseBlock():
             pass  # Виконуємо парсинг блоків case, поки це можливо
-        parseDefaultBlock()
+
+        # parseDefaultBlock()
+
+        # Завершення switch
         parseToken('end', 'keyword')
+
         res = True
     else:
         res = False
@@ -701,18 +720,48 @@ def parseSwitch():
     indent = predIndt()
     return res
 
+global lexDefault,tokDefault
+
 def parseCaseBlock():
-    global numRow
+    global numRow,lexCase, tokCase, lexDefault,tokDefault
     # відступ збільшити
     indent = nextIndt()
+    m1 = createLabel()
+    m2 = createLabel()
     numLine, lex, tok = getSymb()
     if lex == 'case' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
         #getIdent()
+
+        numLine1, lex1, tok1 = getSymb()
+
+        lexDefault = lex1
+        tokDefault = tok1
+
+        postfixCodeGen('rval', (lexCase, tokCase))
+        postfixCodeGen(tok1, (lex1, tok1))
+        postfixCodeGen('==', ('==', 'rel_op'))
+
         parseDigit() or parseIdent()
+
+        postfixCode.append(m1)
+        postfixCode.append(('JF', 'jf'))
+
         parseToken(':', 'punct')
-        parseStatementListSwitch()
+
+        parseStatement()
+
+        postfixCode.append(m2)
+        postfixCode.append(('JMP', 'jump'))
+
+        setValLabel(m1)
+        postfixCode.append(m1)
+        postfixCode.append((':', 'colon'))
+        setValLabel(m2)
+        postfixCode.append(m2)
+        postfixCode.append((':', 'colon'))
+
         res = True
     else:
         res = False
@@ -721,14 +770,35 @@ def parseCaseBlock():
     return res
 
 def parseDefaultBlock():
-    global numRow
+    global numRow, lexDefault,tokDefault
     indent = nextIndt()
     numLine, lex, tok = getSymb()
+
+    m1 = createLabel()
+    m2 = createLabel()
+
     if lex == 'default' and tok == 'keyword':
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
         numRow += 1
+
+        postfixCodeGen('rval', (lexCase, tokCase))
+        postfixCodeGen(tokDefault, (lexDefault, tokDefault))
+        postfixCodeGen('!=', ('!=', 'rel_op'))
+
+        postfixCode.append(m1)
+        postfixCode.append(('JF', 'jf'))
+
+
         parseToken(':', 'punct')
         parseStatementList()
+
+        postfixCode.append(m2)
+        postfixCode.append(('JMP', 'jump'))
+
+        setValLabel(m2)
+        postfixCode.append(m2)
+        postfixCode.append((':', 'colon'))
+
         res = True
     else:
         res = False
@@ -1249,7 +1319,6 @@ def parseFor():
 
     m1 = createLabel()  # Мітка для тіла циклу
     m2 = createLabel()  # Мітка для перевірки умови циклу
-    m3 = createLabel()  # Мітка для завершення циклу
 
     numLine, lex, tok = getSymb()
     if lex == 'for' and tok == 'keyword':
