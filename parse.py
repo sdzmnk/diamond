@@ -542,8 +542,10 @@ def parseAssign():
                 res = True
 
 
+
             postfixCodeGen(lexT, (lexT, tokT))
             if toView: configToPrint(lex, numRow)
+
 
         else:
 
@@ -576,74 +578,272 @@ def parseAssign():
     return resType, res
 
 
+# def parseExpression():
+#     global numRow
+#     # відступ збільшити
+#     indent = nextIndt()
+#     print(indent + 'parseExpression():')
+#     numLine, lex, tok = getSymb()
+#     lType = parseTerm()
+#     if lType == 'id':
+#         lType = getTypeVar(lex)
+#         if lType == 'undeclared_variable':
+#             failParse('використання неоголошеної змінної', (numLine, lex, tok))
+#         else:
+#             if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи змінна має значення
+#                 tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+#                 failParse('використання змінної, що не набула значення', tpl)
+#             else:
+#                 var_type = tableOfVar[lex][1]
+#                 lType = var_type
+#     resType = lType
+#     F = True
+#     while F:
+#         numLineT, lexT, tokT = getSymb()
+#
+#         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
+#
+#             numRow += 1
+#             numLineR, lexR, tokR = getSymb()
+#
+#
+#             print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
+#             rType = parseTerm()
+#
+#             if lexT == '/' and lexR == '0':
+#                 tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+#                 failParse('ділення на нуль', tpl)
+#             if rType == 'id':
+#                 if tableOfVar[lexR][2] == 'undefined':  # Перевірка, чи змінна має значення
+#                     tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
+#                     failParse('використання змінної, що не набула значення', tpl)
+#                 else:
+#                     var_type = tableOfVar[lexR][1]
+#                     rType = var_type
+#
+#
+#             resType = getTypeOp(lType, lexT, rType)
+#             if resType != 'type_error':
+#                 lType = resType
+#             else:
+#                 tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
+#                 failParse(resType, tpl)
+#
+#             if tokT == 'pow_op':
+#                 postfixCodeGen('**', ('**', 'pow_op'))
+#                 if toView: configToPrint(lexT, numLineT)
+#
+#             elif tokT != 'pow_op':
+#                 postfixCodeGen(lexT, (lexT, tokT))
+#                 if toView: configToPrint(lexT, numLineT)
+#
+#         else:
+#             F = False
+#     # перед поверненням - зменшити відступ
+#     indent = predIndt()
+#     return resType
+
+# def parseExpression():
+#     global numRow
+#     operator_stack = []  # Для хранения операторов
+#     operand_stack = []  # Для хранения операндов (для генерации кода)
+#
+#     indent = nextIndt()
+#     print(indent + 'parseExpression():')
+#     numLine, lex, tok = getSymb()
+#     lType = parseTerm()
+#
+#     if lType == 'id':
+#         lType = getTypeVar(lex)
+#         if lType == 'undeclared_variable':
+#             failParse('використання неоголошеної змінної', (numLine, lex, tok))
+#         else:
+#             if tableOfVar[lex][2] == 'undefined':  # Проверка, имеет ли переменная значение
+#                 tpl = (numLine)  # Использование необъявленной или неинициализированной переменной
+#                 failParse('використання змінної, що не набула значення', tpl)
+#             else:
+#                 var_type = tableOfVar[lex][1]
+#                 lType = var_type
+#
+#     # Сохраняем первый операнд
+#     operand_stack.append(lex)
+#     resType = lType
+#
+#     F = True
+#     while F:
+#         numLineT, lexT, tokT = getSymb()
+#
+#         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
+#             numRow += 1
+#             numLineR, lexR, tokR = getSymb()
+#
+#             print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
+#             rType = parseTerm()
+#
+#             if lexT == '/' and lexR == '0':
+#                 failParse('ділення на нуль', (numLine, lexT, tokT))
+#
+#             if rType == 'id':
+#                 if tableOfVar[lexR][2] == 'undefined':  # Проверка, имеет ли переменная значение
+#                     failParse('використання змінної, що не набула значення', (numLine, lexT, tokT))
+#                 else:
+#                     var_type = tableOfVar[lexR][1]
+#                     rType = var_type
+#
+#             # Проверка типа операции
+#             resType = getTypeOp(lType, lexT, rType)
+#             if resType == 'type_error':
+#                 failParse('невідповідність типів', (numLine, lType, lexT, rType))
+#
+#             # Постфиксная обработка с учетом приоритета
+#             while operator_stack and precedence(operator_stack[-1][0]) >= precedence(lexT):
+#                 # Генерация кода для предыдущего оператора
+#                 op, tok_op = operator_stack.pop()
+#                 right_operand = operand_stack.pop()
+#                 left_operand = operand_stack.pop()
+#                 postfixCodeGen(op, (op, tok_op))
+#                 operand_stack.append(op)  # Результат добавляется как временная переменная
+#
+#             # Сохраняем текущий оператор и правый операнд
+#             operator_stack.append((lexT, tokT))
+#             operand_stack.append(lexR)
+#
+#         else:
+#             F = False
+#
+#     # Завершение обработки: генерация оставшихся операторов
+#     while operator_stack:
+#         op, tok_op = operator_stack.pop()
+#         right_operand = operand_stack.pop()
+#         left_operand = operand_stack.pop()
+#         postfixCodeGen(op, (op, tok_op))
+#         operand_stack.append(op)  # Результат добавляется как временная переменная
+#
+#     # Перед возвращением уменьшаем отступ
+#     indent = predIndt()
+#     return resType
+#
+#
+# def precedence(operator):
+#     """Функция для задания приоритета операций."""
+#     priorities = {'+': 1, '-': 1, '*': 2, '/': 2, '**': 3}
+#     return priorities.get(operator, 0)
+
 def parseExpression():
     global numRow
-    # відступ збільшити
+    operator_stack = []  # Для зберігання операторів
+    operand_stack = []  # Для зберігання операндів (для генерації коду)
+
     indent = nextIndt()
     print(indent + 'parseExpression():')
     numLine, lex, tok = getSymb()
     lType = parseTerm()
+
     if lType == 'id':
         lType = getTypeVar(lex)
         if lType == 'undeclared_variable':
             failParse('використання неоголошеної змінної', (numLine, lex, tok))
         else:
-            if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи змінна має значення
-                tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
-                failParse('використання змінної, що не набула значення', tpl)
+            if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи має змінна значення
+                failParse('використання змінної, що не набула значення', (numLine, lex, tok))
             else:
                 var_type = tableOfVar[lex][1]
                 lType = var_type
+
+    # Зберігаємо перший операнд
+    operand_stack.append(lex)
     resType = lType
+
     F = True
     while F:
         numLineT, lexT, tokT = getSymb()
 
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
+            # Обробляємо оператор
+            while operator_stack:
+                top_op, top_tok = operator_stack[-1]
+                if should_pop_operator(top_op, lexT):
+                    # Генерація коду для верхнього оператора
+                    operator_stack.pop()
+                    right_operand = operand_stack.pop()
+                    left_operand = operand_stack.pop()
+                    postfixCodeGen(top_op, (top_op, top_tok))
+                    operand_stack.append(f"temp_{numRow}")  # Результат операції
+                else:
+                    break
 
-            numRow += 1
+            # Зберігаємо поточний оператор
+            operator_stack.append((lexT, tokT))
+            numRow += 1  # Перехід до наступного рядка
             numLineR, lexR, tokR = getSymb()
 
-
-            print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
+            print(indent + 'у рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
             rType = parseTerm()
 
             if lexT == '/' and lexR == '0':
-                tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
-                failParse('ділення на нуль', tpl)
+                failParse('ділення на нуль', (numLine, lexT, tokT))
+
             if rType == 'id':
-                if tableOfVar[lexR][2] == 'undefined':  # Перевірка, чи змінна має значення
-                    tpl = (numLine)  # Використання неоголошеної або неініціалізованої змінної
-                    failParse('використання змінної, що не набула значення', tpl)
+                if tableOfVar[lexR][2] == 'undefined':  # Перевірка, чи має змінна значення
+                    failParse('використання змінної, що не набула значення', (numLine, lexT, tokT))
                 else:
                     var_type = tableOfVar[lexR][1]
                     rType = var_type
 
-
+            # Перевірка типу операції
             resType = getTypeOp(lType, lexT, rType)
-            if resType != 'type_error':
-                lType = resType
-            else:
-                tpl = (numLine, lType, lex, rType)  # для повiдомлення про помилку
-                failParse(resType, tpl)
+            if resType == 'type_error':
+                failParse('невідповідність типів', (numLine, lType, lexT, rType))
 
-            if tokT == 'pow_op':
-                postfixCodeGen('**', ('**', 'pow_op'))
-                if toView: configToPrint(lexT, numLineT)
+            operand_stack.append(lexR)
 
-            elif tokT != 'pow_op':
-                postfixCodeGen(lexT, (lexT, tokT))
-                if toView: configToPrint(lexT, numLineT)
+        elif tokT == 'open_paren':  # Відкриваюча дужка
+            operator_stack.append((lexT, tokT))
+        elif tokT == 'close_paren':  # Закриваюча дужка
+            while operator_stack and operator_stack[-1][0] != '(':
+                op, tok_op = operator_stack.pop()
+                right_operand = operand_stack.pop()
+                left_operand = operand_stack.pop()
+                postfixCodeGen(op, (op, tok_op))
+                operand_stack.append(f"temp_{numRow}")
+            operator_stack.pop()  # Видаляємо '(' зі стеку
 
         else:
             F = False
-    # перед поверненням - зменшити відступ
+
+    # Завершення обробки: генерація залишкових операторів
+    while operator_stack:
+        op, tok_op = operator_stack.pop()
+        right_operand = operand_stack.pop()
+        left_operand = operand_stack.pop()
+        postfixCodeGen(op, (op, tok_op))
+        operand_stack.append(f"temp_{numRow}")
+
+    # Перед поверненням зменшуємо відступ
     indent = predIndt()
     return resType
 
 
+def precedence(operator):
+    """Функція для задання пріоритету операцій."""
+    priorities = {'+': 1, '-': 1, '*': 2, '/': 2, '**': 3}
+    return priorities.get(operator, 0)
+
+
+def should_pop_operator(top_op, current_op):
+    """Визначає, чи потрібно видалити верхній оператор зі стеку."""
+    top_precedence = precedence(top_op)
+    current_precedence = precedence(current_op)
+
+    # Для всіх операторів, окрім **, порівнюємо пріоритети
+    if current_op == '**':
+        return top_precedence > current_precedence  # Правоасоціативність
+    else:
+        return top_precedence >= current_precedence  # Лівоасоціативність
+
 
 # Функція для розбору ідентифікатора
+
 def parseIdent():
     global numRow
     # збільшити відступ
@@ -1631,11 +1831,17 @@ def compileToPostfix(fileName):
         len_tableOfSymb = len(tableOfSymb)
         print('-'*55)
         print('compileToPostfix: Start Up compiler = parser + codeGenerator\n')
-        FSuccess = (False)
+        FSuccess = False
         FSuccess = parseProgram()
         if FSuccess == (True):
             #serv()
             savePostfixCode('test1')
+        if not FSuccess:
+            fname = "test1.postfix"
+            f = open(fname, 'w')
+
+            f.close()
+            print(f"Postfix-код не було збережено у файл {fname}")
     return FSuccess
 
 def configToPrint(lex,numRow):

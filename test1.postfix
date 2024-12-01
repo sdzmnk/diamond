@@ -15,10 +15,13 @@
    i2    int        
    i3    int        
    sw1   int        
-   sw2   float      
+   sw2   int        
    sw3   int        
    sw4   int        
    a     int        
+   exp1  type_error 
+   exp2  float      
+   exp3  float      
 )
 
 .labels(
@@ -33,17 +36,17 @@
    m9   101 
    m10   92 
    m11  110 
-   m12  164 
-   m13  143 
+   m12  159 
+   m13  138 
    m14 val_undef 
    m15 val_undef 
    m16 val_undef 
-   m17  178 
-   m18  180 
-   m19  191 
-   m20  193 
-   m21  204 
-   m22  206 
+   m17  173 
+   m18  175 
+   m19  186 
+   m20  188 
+   m21  199 
+   m22  201 
    m23 val_undef 
    m24 val_undef 
 )
@@ -66,6 +69,10 @@
 166   int        
 266   int        
 366   int        
+2.0   float      
+100.0  float      
+50.0  float      
+3.0   float      
 )
 
 .code(
@@ -198,11 +205,6 @@
    2     int   
    NEG   neg_op
    =     assign_op
-   sw2   l-val 
-   2     int   
-   3     int   
-   **    pow_op
-   =     assign_op
    sw3   l-val 
    8     int   
    =     assign_op
@@ -277,4 +279,24 @@
    :     colon 
    m22   label 
    :     colon 
+   a     r-val 
+   OUT   out_op
+   exp1  l-val 
+   2.0   float 
+   2.0   float 
+   2.0   float 
+   **    pow_op
+   **    pow_op
+   =     assign_op
+   exp1  l-val 
+   100.0 float 
+   50.0  float 
+   -     add_op
+   3.0   float 
+   2.0   float 
+   +     add_op
+   *     mult_op
+   =     assign_op
+   exp1  r-val 
+   OUT   out_op
 )
