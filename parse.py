@@ -526,16 +526,16 @@ def parseAssign():
 
                 if toView: configToPrint(lexNext, numLineNext)
 
-                resType = getTypeOp(lTypebrac, '+', rType)
-                tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+                # resType = getTypeOp(lTypebrac, '+', rType)
+                # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
 
                 if resType == 'type_error':
                     failParse(resType, (numLine, lexN,))
                 res = True
             if isExtendedExpression == False:
-                resType = getTypeOp(lType, '=', rType)
-
-                tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+                # resType = getTypeOp(lType, '=', rType)
+                #
+                # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
 
                 if resType == 'type_error':
                     failParse(resType, (numLine, lexN,))
@@ -642,160 +642,68 @@ def parseAssign():
 #     # перед поверненням - зменшити відступ
 #     indent = predIndt()
 #     return resType
+#
 
-# def parseExpression():
-#     global numRow
-#     operator_stack = []  # Для хранения операторов
-#     operand_stack = []  # Для хранения операндов (для генерации кода)
-#
-#     indent = nextIndt()
-#     print(indent + 'parseExpression():')
-#     numLine, lex, tok = getSymb()
-#     lType = parseTerm()
-#
-#     if lType == 'id':
-#         lType = getTypeVar(lex)
-#         if lType == 'undeclared_variable':
-#             failParse('використання неоголошеної змінної', (numLine, lex, tok))
-#         else:
-#             if tableOfVar[lex][2] == 'undefined':  # Проверка, имеет ли переменная значение
-#                 tpl = (numLine)  # Использование необъявленной или неинициализированной переменной
-#                 failParse('використання змінної, що не набула значення', tpl)
-#             else:
-#                 var_type = tableOfVar[lex][1]
-#                 lType = var_type
-#
-#     # Сохраняем первый операнд
-#     operand_stack.append(lex)
-#     resType = lType
-#
-#     F = True
-#     while F:
-#         numLineT, lexT, tokT = getSymb()
-#
-#         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
-#             numRow += 1
-#             numLineR, lexR, tokR = getSymb()
-#
-#             print(indent + 'в рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
-#             rType = parseTerm()
-#
-#             if lexT == '/' and lexR == '0':
-#                 failParse('ділення на нуль', (numLine, lexT, tokT))
-#
-#             if rType == 'id':
-#                 if tableOfVar[lexR][2] == 'undefined':  # Проверка, имеет ли переменная значение
-#                     failParse('використання змінної, що не набула значення', (numLine, lexT, tokT))
-#                 else:
-#                     var_type = tableOfVar[lexR][1]
-#                     rType = var_type
-#
-#             # Проверка типа операции
-#             resType = getTypeOp(lType, lexT, rType)
-#             if resType == 'type_error':
-#                 failParse('невідповідність типів', (numLine, lType, lexT, rType))
-#
-#             # Постфиксная обработка с учетом приоритета
-#             while operator_stack and precedence(operator_stack[-1][0]) >= precedence(lexT):
-#                 # Генерация кода для предыдущего оператора
-#                 op, tok_op = operator_stack.pop()
-#                 right_operand = operand_stack.pop()
-#                 left_operand = operand_stack.pop()
-#                 postfixCodeGen(op, (op, tok_op))
-#                 operand_stack.append(op)  # Результат добавляется как временная переменная
-#
-#             # Сохраняем текущий оператор и правый операнд
-#             operator_stack.append((lexT, tokT))
-#             operand_stack.append(lexR)
-#
-#         else:
-#             F = False
-#
-#     # Завершение обработки: генерация оставшихся операторов
-#     while operator_stack:
-#         op, tok_op = operator_stack.pop()
-#         right_operand = operand_stack.pop()
-#         left_operand = operand_stack.pop()
-#         postfixCodeGen(op, (op, tok_op))
-#         operand_stack.append(op)  # Результат добавляется как временная переменная
-#
-#     # Перед возвращением уменьшаем отступ
-#     indent = predIndt()
-#     return resType
-#
-#
-# def precedence(operator):
-#     """Функция для задания приоритета операций."""
-#     priorities = {'+': 1, '-': 1, '*': 2, '/': 2, '**': 3}
-#     return priorities.get(operator, 0)
 
 def parseExpression():
     global numRow
     operator_stack = []  # Для зберігання операторів
-    operand_stack = []  # Для зберігання операндів (для генерації коду)
+    operand_stack = []   # Для зберігання операндів (для генерації коду)
 
     indent = nextIndt()
     print(indent + 'parseExpression():')
     numLine, lex, tok = getSymb()
-    lType = parseTerm()
+    lType = parseTerm()  # Починаємо з першого терма
 
     if lType == 'id':
         lType = getTypeVar(lex)
         if lType == 'undeclared_variable':
             failParse('використання неоголошеної змінної', (numLine, lex, tok))
+        elif tableOfVar[lex][2] == 'undefined':
+            failParse('використання змінної, що не набула значення', (numLine, lex, tok))
         else:
-            if tableOfVar[lex][2] == 'undefined':  # Перевірка, чи має змінна значення
-                failParse('використання змінної, що не набула значення', (numLine, lex, tok))
-            else:
-                var_type = tableOfVar[lex][1]
-                lType = var_type
+            lType = tableOfVar[lex][1]
 
-    # Зберігаємо перший операнд
-    operand_stack.append(lex)
+    operand_stack.append(lex)  # Додаємо операнд в стек
     resType = lType
 
     F = True
     while F:
         numLineT, lexT, tokT = getSymb()
 
-        if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):
-            # Обробляємо оператор
+        if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):  # Якщо оператор
             while operator_stack:
                 top_op, top_tok = operator_stack[-1]
+
+                # Перевіряємо, чи потрібно витягнути оператори зі стека
                 if should_pop_operator(top_op, lexT):
-                    # Генерація коду для верхнього оператора
                     operator_stack.pop()
                     right_operand = operand_stack.pop()
                     left_operand = operand_stack.pop()
+
+                    # Генерація коду для поточної операції
                     postfixCodeGen(top_op, (top_op, top_tok))
                     operand_stack.append(f"temp_{numRow}")  # Результат операції
                 else:
                     break
 
-            # Зберігаємо поточний оператор
-            operator_stack.append((lexT, tokT))
-            numRow += 1  # Перехід до наступного рядка
-            numLineR, lexR, tokR = getSymb()
-
-            print(indent + 'у рядку {0} - токен {1}'.format(numLineT, (lexT, tokT)))
+            operator_stack.append((lexT, tokT))  # Додаємо поточний оператор в стек
+            numRow += 1
             rType = parseTerm()
 
-            if lexT == '/' and lexR == '0':
-                failParse('ділення на нуль', (numLine, lexT, tokT))
+            if lexT == '/' and operand_stack[-1] == '0':  # Перевірка ділення на нуль
+                failParse('ділення на нуль', (numLineT, lexT, tokT))
 
-            if rType == 'id':
-                if tableOfVar[lexR][2] == 'undefined':  # Перевірка, чи має змінна значення
-                    failParse('використання змінної, що не набула значення', (numLine, lexT, tokT))
-                else:
-                    var_type = tableOfVar[lexR][1]
-                    rType = var_type
+            if rType == 'id' and tableOfVar[operand_stack[-1]][2] == 'undefined':
+                failParse('використання змінної, що не набула значення', (numLineT, lexT, tokT))
+            elif rType == 'id':
+                rType = tableOfVar[operand_stack[-1]][1]
 
-            # Перевірка типу операції
             resType = getTypeOp(lType, lexT, rType)
             if resType == 'type_error':
-                failParse('невідповідність типів', (numLine, lType, lexT, rType))
+                failParse('невідповідність типів', (numLineT, lType, lexT, rType))
 
-            operand_stack.append(lexR)
+            operand_stack.append(f"temp_{numRow}")  # Додаємо результат в стек
 
         elif tokT == 'open_paren':  # Відкриваюча дужка
             operator_stack.append((lexT, tokT))
@@ -804,42 +712,44 @@ def parseExpression():
                 op, tok_op = operator_stack.pop()
                 right_operand = operand_stack.pop()
                 left_operand = operand_stack.pop()
+
+                # Генерація коду для операції
                 postfixCodeGen(op, (op, tok_op))
                 operand_stack.append(f"temp_{numRow}")
-            operator_stack.pop()  # Видаляємо '(' зі стеку
+
+            operator_stack.pop()  # Прибираємо '(' зі стека
 
         else:
             F = False
 
-    # Завершення обробки: генерація залишкових операторів
+    # Завершуємо обробку виразу
     while operator_stack:
         op, tok_op = operator_stack.pop()
         right_operand = operand_stack.pop()
         left_operand = operand_stack.pop()
+
+        # Генерація коду для залишкових операторів
         postfixCodeGen(op, (op, tok_op))
         operand_stack.append(f"temp_{numRow}")
 
-    # Перед поверненням зменшуємо відступ
     indent = predIndt()
     return resType
 
 
+
+# Функция для задания приоритета операций
 def precedence(operator):
-    """Функція для задання пріоритету операцій."""
     priorities = {'+': 1, '-': 1, '*': 2, '/': 2, '**': 3}
     return priorities.get(operator, 0)
 
 
 def should_pop_operator(top_op, current_op):
-    """Визначає, чи потрібно видалити верхній оператор зі стеку."""
     top_precedence = precedence(top_op)
     current_precedence = precedence(current_op)
 
-    # Для всіх операторів, окрім **, порівнюємо пріоритети
     if current_op == '**':
-        return top_precedence > current_precedence  # Правоасоціативність
-    else:
-        return top_precedence >= current_precedence  # Лівоасоціативність
+        return top_precedence > current_precedence
+    return top_precedence >= current_precedence
 
 
 # Функція для розбору ідентифікатора

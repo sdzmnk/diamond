@@ -15,38 +15,38 @@
    i2    int        
    i3    int        
    sw1   int        
-   sw2   int        
+   sw2   float      
    sw3   int        
    sw4   int        
    a     int        
-   exp1  type_error 
+   exp1  float      
    exp2  float      
    exp3  float      
 )
 
 .labels(
-   m1    57 
-   m2    74 
-   m3    36 
-   m4    53 
-   m5    48 
-   m6    69 
-   m7    90 
-   m8    76 
-   m9   101 
-   m10   92 
-   m11  110 
-   m12  159 
-   m13  138 
+   m1    63 
+   m2    80 
+   m3    42 
+   m4    59 
+   m5    54 
+   m6    75 
+   m7    96 
+   m8    82 
+   m9   107 
+   m10   98 
+   m11  116 
+   m12  170 
+   m13  149 
    m14 val_undef 
    m15 val_undef 
    m16 val_undef 
-   m17  173 
-   m18  175 
-   m19  186 
-   m20  188 
-   m21  199 
-   m22  201 
+   m17  184 
+   m18  186 
+   m19  197 
+   m20  199 
+   m21  210 
+   m22  212 
    m23 val_undef 
    m24 val_undef 
 )
@@ -55,6 +55,7 @@
 3     int        
 0     int        
 1     int        
+0.0   float      
 11    int        
 2     int        
 22    int        
@@ -70,9 +71,12 @@
 266   int        
 366   int        
 2.0   float      
-100.0  float      
-50.0  float      
+1.0   float      
 3.0   float      
+4.0   float      
+5.0   float      
+6.0   float      
+10.0  float      
 )
 
 .code(
@@ -96,6 +100,12 @@
    =     assign_op
    w     l-val 
    0     int   
+   =     assign_op
+   exp1  l-val 
+   0.0   float 
+   =     assign_op
+   exp2  l-val 
+   0.0   float 
    =     assign_op
    b     r-val 
    1     int   
@@ -205,6 +215,11 @@
    2     int   
    NEG   neg_op
    =     assign_op
+   sw2   l-val 
+   2     int   
+   3     int   
+   **    pow_op
+   =     assign_op
    sw3   l-val 
    8     int   
    =     assign_op
@@ -279,8 +294,6 @@
    :     colon 
    m22   label 
    :     colon 
-   a     r-val 
-   OUT   out_op
    exp1  l-val 
    2.0   float 
    2.0   float 
@@ -288,15 +301,38 @@
    **    pow_op
    **    pow_op
    =     assign_op
-   exp1  l-val 
-   100.0 float 
-   50.0  float 
-   -     add_op
+   exp2  l-val 
+   1.0   float 
+   2.0   float 
+   2.0   float 
    3.0   float 
+   **    pow_op
+   **    pow_op
+   +     add_op
+   4.0   float 
+   5.0   float 
+   /     mult_op
+   -     add_op
+   6.0   float 
+   2.0   float 
+   *     mult_op
+   -     add_op
+   =     assign_op
+   exp3  l-val 
+   10.0  float 
+   3.0   float 
+   -     add_op
+   4.0   float 
    2.0   float 
    +     add_op
+   3.0   float 
+   /     mult_op
    *     mult_op
    =     assign_op
    exp1  r-val 
+   OUT   out_op
+   exp2  r-val 
+   OUT   out_op
+   exp3  r-val 
    OUT   out_op
 )

@@ -15,10 +15,11 @@ sw2 ^ int
 sw3 ^ int
 sw4 ^ int
 a ^ int
-exp1^float
-exp2^float
-exp3^float
+exp1 ^ float
+exp2 ^ float
+exp3 ^ float
 begin
+
 
 b=3
 c=3
@@ -27,6 +28,8 @@ v=0
 s=1
 u=0
 w=0
+exp1=0.0
+exp2 = 0.0
 
 if b==1
     if c==1
@@ -57,7 +60,7 @@ i1, i2, i3 = 1, 2, 9
 
 sw1 = -2
 
-
+sw2 = 2**3
 
 sw3 = 8
 sw4 = 0
@@ -79,13 +82,12 @@ do
         puts 366
 end
 
-puts "a"
-
-
-
 exp1 = 2.0**2.0**2.0
-exp1 = (100.0 - 50.0)*(3.0+2.0)
-puts "exp1"
+exp2 = 1.0+2.0**2.0**3.0 -4.0/5.0 - 6.0*2.0
+exp3 = (10.0 - 3.0) * (4.0 + 2.0)/3.0
 
+puts "exp1"
+puts "exp2"
+puts "exp3"
 
 finish
