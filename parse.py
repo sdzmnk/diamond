@@ -1,5 +1,8 @@
 from diamond import lex, tableOfConst
 from diamond import tableOfSymb
+from postfixCLR import postfixCLR_codeGen
+from postfixCLR import postfixCodeCLR
+from saveCILtoFile import saveCIL
 
 FSuccess = lex()
 
@@ -491,6 +494,8 @@ def parseAssign():
 
     postfixCodeGen('lval', (lex, tok))
 
+    postfixCLR_codeGen('lval',lex)
+
     if toView: configToPrint(lex, numRow)
 
     if lType == 'undeclared_variable':
@@ -556,6 +561,8 @@ def parseAssign():
 
             postfixCodeGen(lexT, (lexT, tokT))
             if toView: configToPrint(lex, numRow)
+
+            postfixCLR_codeGen('=',lType)
 
             if resType == 'type_error':
                 failParse(resType, (numLine, lexN,))
@@ -665,6 +672,7 @@ def parseExpression():
             lType = tableOfVar[lex][1]
 
     operand_stack.append(lex)  # Додаємо операнд в стек
+    postfixCLR_codeGen('const', (lex , lType))
     resType = lType
 
     F = True
@@ -672,6 +680,9 @@ def parseExpression():
         numLineT, lexT, tokT = getSymb()
 
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):  # Якщо оператор
+
+            postfixCLR_codeGen(lexT, lexT)
+
             while operator_stack:
                 top_op, top_tok = operator_stack[-1]
 
@@ -683,6 +694,7 @@ def parseExpression():
 
                     # Генерація коду для поточної операції
                     postfixCodeGen(top_op, (top_op, top_tok))
+
                     operand_stack.append(f"temp_{numRow}")  # Результат операції
                 else:
                     break
@@ -1746,6 +1758,7 @@ def compileToPostfix(fileName):
         if FSuccess == (True):
             #serv()
             savePostfixCode('test1')
+            saveCIL('test1', tableOfVar,postfixCodeCLR)
         if not FSuccess:
             fname = "test1.postfix"
             f = open(fname, 'w')
