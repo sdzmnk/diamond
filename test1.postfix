@@ -9,14 +9,17 @@
 )
 
 .constants(
-3     int        
+7     int        
 2     int        
+1     int        
 )
 
 .code(
    b     l-val 
-   3     int   
+   7     int   
    2     int   
    -     add_op
+   1     int   
+   +     add_op
    =     assign_op
 )

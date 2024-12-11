@@ -20,7 +20,7 @@ print(('len_tableOfSymb', len_tableOfSymb))
 tableOfVar = {}
 tableOfLabel = {}
 postfixCode = []
-toView = True
+toView = False
 
 # Функція для розбору за правилом
 # Program = {Comment | StatementList} end
@@ -530,7 +530,8 @@ def parseAssign():
                 postfixCodeGen(tokNext, (lexNext, tokNext))
 
                 if toView: configToPrint(lexNext, numLineNext)
-
+                postfixCLR_codeGen(tokNext, (lexNext, tokNext))
+                print('fff',lexNext, tokNext)
                 # resType = getTypeOp(lTypebrac, '+', rType)
                 # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
 
@@ -549,9 +550,12 @@ def parseAssign():
 
 
             postfixCodeGen(lexT, (lexT, tokT))
+            # print('fff',lexT, tokT)
             if toView: configToPrint(lex, numRow)
-
-
+            if (tokT=='assign_op'):
+                postfixCLR_codeGen('=', lType)
+            else:
+                postfixCLR_codeGen(lexT, (lexT, tokT))
         else:
 
             rType = parseExpression()
@@ -583,6 +587,124 @@ def parseAssign():
     # if toView: configToPrint(lex, numRow)
     indent = predIndt()
     return resType, res
+
+
+# def parseAssign():
+#     global numRow
+#     indent = nextIndt()
+#     print(indent + 'parseAssign():')
+#     numLine, lex, tok = getSymb()
+#
+#     print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#     numRow += 1
+#     numLineT, lexT, tokT = getSymb()
+#     lType = getTypeVar(lex)
+#
+#     postfixCodeGen('lval', (lex, tok))
+#     postfixCLR_codeGen('lval', lex)
+#
+#     if toView:
+#         configToPrint(lex, numRow)
+#
+#     if lType == 'undeclared_variable':
+#         failParse('використання неоголошеної змінної', (numLine, lex, tok))
+#
+#     resType = None
+#     res = None
+#     isExtendedExpression = False
+#
+#     if lexT == '=':
+#         parseToken('=', 'assign_op')
+#         operator_stack = []  # Стек операторов
+#         operand_stack = [(lex, lType)]  # Стек операндов (начинаем с левого операнда)
+#
+#         numRow += 1
+#         numLineN, lexN, tokN = getSymb()
+#
+#         if lexN == 'gets':
+#             parseInp()
+#             res = True
+#         else:
+#             if lexN == '(':
+#                 parseToken('(', 'brackets_op')
+#                 rType = parseExpression()  # Обработка выражения в скобках
+#                 parseToken(')', 'brackets_op')
+#                 operand_stack.append((f"temp_{numRow}", rType))
+#
+#                 # Проверка на продолжение выражения после закрывающей скобки
+#                 numLineNext, lexNext, tokNext = getSymb()
+#                 if tokNext in ('add_op', 'mult_op', 'pow_op'):
+#                     isExtendedExpression = True
+#             else:
+#                 rType = parseTerm()
+#                 operand_stack.append((f"temp_{numRow}", rType))
+#
+#             while True:
+#                 numLineT, lexT, tokT = getSymb()
+#
+#                 if tokT in ('add_op', 'mult_op', 'pow_op'):
+#                     while operator_stack:
+#                         top_op, top_tok = operator_stack[-1]
+#
+#                         if should_pop_operator(top_op, lexT):
+#                             operator_stack.pop()
+#                             right_operand = operand_stack.pop()
+#                             left_operand = operand_stack.pop()
+#
+#                             postfixCodeGen(top_op, (top_op, top_tok))
+#                             postfixCLR_codeGen(top_op, (top_op, top_tok))
+#
+#                             operand_stack.append((f"temp_{numRow}", 'temp'))
+#                         else:
+#                             break
+#
+#                     operator_stack.append((lexT, tokT))
+#                     numRow += 1
+#                     rType = parseTerm()
+#
+#                     if lexT == '/' and operand_stack[-1][0] == '0':
+#                         failParse('ділення на нуль', (numLineT, lexT, tokT))
+#
+#                     resType = getTypeOp(lType, lexT, rType)
+#                     if resType == 'type_error':
+#                         failParse('невідповідність типів', (numLineT, lType, lexT, rType))
+#
+#                     operand_stack.append((f"temp_{numRow}", resType))
+#                 else:
+#                     break
+#
+#             while operator_stack:
+#                 op, tok_op = operator_stack.pop()
+#                 right_operand = operand_stack.pop()
+#                 left_operand = operand_stack.pop()
+#
+#                 postfixCodeGen(op, (op, tok_op))
+#                 postfixCLR_codeGen(op, (op, tok_op))
+#
+#                 operand_stack.append((f"temp_{numRow}", 'temp'))
+#
+#             if not isExtendedExpression:
+#                 resType = getTypeOp(lType, '=', rType)
+#                 tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
+#
+#             postfixCodeGen('=', ('=', 'assign_op'))
+#             postfixCLR_codeGen('=', lType)
+#
+#             if toView:
+#                 configToPrint(lex, numRow)
+#     elif lexT == ',':
+#         parseToken(',', 'punct')
+#         parseDeclaration()
+#         type = tableOfConst[firstNumber][0]
+#         resType = getTypeOp(lType, '=', type)
+#         tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
+#         res = True
+#     else:
+#         res = False
+#
+#     isInitVar(lex)
+#     indent = predIndt()
+#     return resType, res
 
 
 # def parseExpression():
@@ -672,7 +794,7 @@ def parseExpression():
             lType = tableOfVar[lex][1]
 
     operand_stack.append(lex)  # Додаємо операнд в стек
-    postfixCLR_codeGen('const', (lex , lType))
+    # postfixCLR_codeGen('const', (lex , lType))
     resType = lType
 
     F = True
@@ -681,7 +803,7 @@ def parseExpression():
 
         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):  # Якщо оператор
 
-            postfixCLR_codeGen(lexT, lexT)
+            # postfixCLR_codeGen(lexT, lexT)
 
             while operator_stack:
                 top_op, top_tok = operator_stack[-1]
@@ -694,12 +816,15 @@ def parseExpression():
 
                     # Генерація коду для поточної операції
                     postfixCodeGen(top_op, (top_op, top_tok))
+                    print(top_op)
 
+                    postfixCLR_codeGen(top_op, (top_op, top_tok))
                     operand_stack.append(f"temp_{numRow}")  # Результат операції
                 else:
                     break
 
             operator_stack.append((lexT, tokT))  # Додаємо поточний оператор в стек
+
             numRow += 1
             rType = parseTerm()
 
@@ -728,7 +853,7 @@ def parseExpression():
                 # Генерація коду для операції
                 postfixCodeGen(op, (op, tok_op))
                 operand_stack.append(f"temp_{numRow}")
-
+                postfixCLR_codeGen(op, (op, tok_op))
             operator_stack.pop()  # Прибираємо '(' зі стека
 
         else:
@@ -743,7 +868,7 @@ def parseExpression():
         # Генерація коду для залишкових операторів
         postfixCodeGen(op, (op, tok_op))
         operand_stack.append(f"temp_{numRow}")
-
+        postfixCLR_codeGen(op, (op, tok_op))
     indent = predIndt()
     return resType
 
@@ -1052,6 +1177,7 @@ def parseFactor():
 
                 postfixCodeGen(lex, (lex, tok))
                 if toView: configToPrint(lex, numLine)
+                # postfixCLR_codeGen('const', (lex, tok))
                 postfixCode.append(('NEG', 'neg_op'))
 
                 lex = str(-float(lex)) if '.' in lex else str(-int(lex))  # Застосовуємо унарний мінус
@@ -1071,9 +1197,11 @@ def parseFactor():
 
             postfixCodeGen('rval', (lex, 'rval'))
             if toView: configToPrint(lex, numRow)
+            postfixCLR_codeGen('const', (lex, 'rval'))
         else:
             postfixCodeGen('const',(lex, tok))
             if toView: configToPrint(lex, numRow)
+            postfixCLR_codeGen('const', (lex, tok))
 
         numRow += 1
         print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))

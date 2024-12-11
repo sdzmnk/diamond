@@ -27,8 +27,10 @@
    .entrypoint
    //.maxstack  8
     ldloca    b
-    ldc.i4    3
+    ldc.i4    7
+    ldc.i4    2
     sub
+    ldc.i4    1
     stind.i4
 	ret    
 }

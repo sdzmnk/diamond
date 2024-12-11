@@ -1,6 +1,6 @@
 b ^ int
 begin
 
-b = 3 - 2
+b = (7 - 2) + 1
 
 finish

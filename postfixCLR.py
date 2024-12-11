@@ -28,6 +28,8 @@ def postfixCLR_codeGen(case,toTran):
         postfixCodeCLR.append(tl + 'add')
     elif case == '-':
         postfixCodeCLR.append(tl + 'sub')
+    elif case == '**':
+        postfixCodeCLR.append(tl + 'pow')
     elif case == '*':
         postfixCodeCLR.append(tl + 'mul')
     elif case == '/':
