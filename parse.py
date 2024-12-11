@@ -476,117 +476,117 @@ def postfixCodeGen(case,toTran):
         lex,tok = toTran
         postfixCode.append((lex,tok))
 
-def parseAssign():
-    # номер запису таблиці розбору
-    global numRow
-    # відступ збільшити
-    indent = nextIndt()
-    print(indent + 'parseAssign():')
-    # взяти поточну лексему
-    numLine, lex, tok = getSymb()
-
-    print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
-    # встановити номер нової поточної лексеми
-    numRow += 1
-    numLineT, lexT, tokT = getSymb()
-    lType = getTypeVar(lex)
-
-
-    postfixCodeGen('lval', (lex, tok))
-
-    postfixCLR_codeGen('lval',lex)
-
-    if toView: configToPrint(lex, numRow)
-
-    if lType == 'undeclared_variable':
-        failParse('використання неоголошеної змінної', (numLine, lex, tok))
-    resType = None
-    isExtendedExpression = False
-    if lexT == '=':
-        parseToken('=', 'assign_op')
-        numLineN, lexN, tokN = getSymb()
-        if lexN == 'gets':
-            parseInp()
-            res = True
-        elif lexN == '(':
-            parseToken('(', 'brackets_op')
-            rType = parseExpression()  # Отримуємо тип виразу всередині дужок
-            parseToken(')', 'brackets_op')
-
-            # Перевіряємо, чи є продовження виразу після закритої дужки (+)
-            numLineNext, lexNext, tokNext = getSymb()
-            if tokNext in ['add_op','mult_op', 'pow_op']:
-                isExtendedExpression = True
-                lTypebrac = rType
-                numRow += 1  # Переходимо до наступного токена (після операції)
-                numLineNextN, lexNextN, tokNextN = getSymb()  # Оновлюємо поточний токен
-                if lexNext == '/' and lexNextN == '0':
-                    tpl = (numLineNext)  # Використання неоголошеної або неініціалізованої змінної
-                    failParse('ділення на нуль', tpl)
-
-                rType = parseExpression()  # Продовжуємо обробку всього виразу
-
-
-                postfixCodeGen(tokNext, (lexNext, tokNext))
-
-                if toView: configToPrint(lexNext, numLineNext)
-                postfixCLR_codeGen(tokNext, (lexNext, tokNext))
-                print('fff',lexNext, tokNext)
-                # resType = getTypeOp(lTypebrac, '+', rType)
-                # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
-
-                if resType == 'type_error':
-                    failParse(resType, (numLine, lexN,))
-                res = True
-            if isExtendedExpression == False:
-                # resType = getTypeOp(lType, '=', rType)
-                #
-                # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
-
-                if resType == 'type_error':
-                    failParse(resType, (numLine, lexN,))
-                res = True
-
-
-
-            postfixCodeGen(lexT, (lexT, tokT))
-            # print('fff',lexT, tokT)
-            if toView: configToPrint(lex, numRow)
-            if (tokT=='assign_op'):
-                postfixCLR_codeGen('=', lType)
-            else:
-                postfixCLR_codeGen(lexT, (lexT, tokT))
-        else:
-
-            rType = parseExpression()
-            resType = getTypeOp(lType, '=', rType)
-            tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип
-
-
-            postfixCodeGen(lexT, (lexT, tokT))
-            if toView: configToPrint(lex, numRow)
-
-            postfixCLR_codeGen('=',lType)
-
-            if resType == 'type_error':
-                failParse(resType, (numLine, lexN,))
-            res = True
-    elif lexT == ',':
-        parseToken(',', 'punct')
-        parseDeclaration()
-        # postfixCodeGen('=', ('=', 'assign_op'))
-        type = tableOfConst[firstNumber][0]
-        resType = getTypeOp(lex, '=', type)
-        tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
-
-        res = True
-    else:
-        res = False
-    isInitVar(lex)
-    # postfixCodeGen('=', ('=', 'assign_op'))
-    # if toView: configToPrint(lex, numRow)
-    indent = predIndt()
-    return resType, res
+# def parseAssign():
+#     # номер запису таблиці розбору
+#     global numRow
+#     # відступ збільшити
+#     indent = nextIndt()
+#     print(indent + 'parseAssign():')
+#     # взяти поточну лексему
+#     numLine, lex, tok = getSymb()
+#
+#     print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+#     # встановити номер нової поточної лексеми
+#     numRow += 1
+#     numLineT, lexT, tokT = getSymb()
+#     lType = getTypeVar(lex)
+#
+#
+#     postfixCodeGen('lval', (lex, tok))
+#
+#     postfixCLR_codeGen('lval',lex)
+#
+#     if toView: configToPrint(lex, numRow)
+#
+#     if lType == 'undeclared_variable':
+#         failParse('використання неоголошеної змінної', (numLine, lex, tok))
+#     resType = None
+#     isExtendedExpression = False
+#     if lexT == '=':
+#         parseToken('=', 'assign_op')
+#         numLineN, lexN, tokN = getSymb()
+#         if lexN == 'gets':
+#             parseInp()
+#             res = True
+#         elif lexN == '(':
+#             parseToken('(', 'brackets_op')
+#             rType = parseExpression()  # Отримуємо тип виразу всередині дужок
+#             parseToken(')', 'brackets_op')
+#
+#             # Перевіряємо, чи є продовження виразу після закритої дужки (+)
+#             numLineNext, lexNext, tokNext = getSymb()
+#             if tokNext in ['add_op','mult_op', 'pow_op']:
+#                 isExtendedExpression = True
+#                 lTypebrac = rType
+#                 numRow += 1  # Переходимо до наступного токена (після операції)
+#                 numLineNextN, lexNextN, tokNextN = getSymb()  # Оновлюємо поточний токен
+#                 if lexNext == '/' and lexNextN == '0':
+#                     tpl = (numLineNext)  # Використання неоголошеної або неініціалізованої змінної
+#                     failParse('ділення на нуль', tpl)
+#
+#                 rType = parseExpression()  # Продовжуємо обробку всього виразу
+#
+#
+#                 postfixCodeGen(tokNext, (lexNext, tokNext))
+#
+#                 if toView: configToPrint(lexNext, numLineNext)
+#                 postfixCLR_codeGen(tokNext, (lexNext, tokNext))
+#                 print('fff',lexNext, tokNext)
+#                 # resType = getTypeOp(lTypebrac, '+', rType)
+#                 # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+#
+#                 if resType == 'type_error':
+#                     failParse(resType, (numLine, lexN,))
+#                 res = True
+#             if isExtendedExpression == False:
+#                 # resType = getTypeOp(lType, '=', rType)
+#                 #
+#                 # tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+#
+#                 if resType == 'type_error':
+#                     failParse(resType, (numLine, lexN,))
+#                 res = True
+#
+#
+#
+#             postfixCodeGen(lexT, (lexT, tokT))
+#             # print('fff',lexT, tokT)
+#             if toView: configToPrint(lex, numRow)
+#             if (tokT=='assign_op'):
+#                 postfixCLR_codeGen('=', lType)
+#             else:
+#                 postfixCLR_codeGen(lexT, (lexT, tokT))
+#         else:
+#
+#             rType = parseExpression()
+#             resType = getTypeOp(lType, '=', rType)
+#             tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип
+#
+#
+#             postfixCodeGen(lexT, (lexT, tokT))
+#             if toView: configToPrint(lex, numRow)
+#
+#             postfixCLR_codeGen('=',lType)
+#
+#             if resType == 'type_error':
+#                 failParse(resType, (numLine, lexN,))
+#             res = True
+#     elif lexT == ',':
+#         parseToken(',', 'punct')
+#         parseDeclaration()
+#         # postfixCodeGen('=', ('=', 'assign_op'))
+#         type = tableOfConst[firstNumber][0]
+#         resType = getTypeOp(lex, '=', type)
+#         tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
+#
+#         res = True
+#     else:
+#         res = False
+#     isInitVar(lex)
+#     # postfixCodeGen('=', ('=', 'assign_op'))
+#     # if toView: configToPrint(lex, numRow)
+#     indent = predIndt()
+#     return resType, res
 
 
 # def parseAssign():
@@ -706,6 +706,159 @@ def parseAssign():
 #     indent = predIndt()
 #     return resType, res
 
+def parseAssign():
+    # номер запису таблиці розбору
+    global numRow
+    # відступ збільшити
+    indent = nextIndt()
+    print(indent + 'parseAssign():')
+    # взяти поточну лексему
+    numLine, lex, tok = getSymb()
+
+    print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
+    # встановити номер нової поточної лексеми
+    numRow += 1
+    numLineT, lexT, tokT = getSymb()
+    lType = getTypeVar(lex)
+
+    postfixCodeGen('lval', (lex, tok))
+
+    postfixCLR_codeGen('lval', lex)
+
+    if toView: configToPrint(lex, numRow)
+
+    if lType == 'undeclared_variable':
+        failParse('використання неоголошеної змінної', (numLine, lex, tok))
+    resType = None
+
+    if lexT == '=':
+        parseToken('=', 'assign_op')
+        numLineN, lexN, tokN = getSymb()
+
+        if lexN == 'gets':
+            parseInp()
+            res = True
+        else:
+            rType = parseExpression()  # Обробляємо вираз праворуч від знаку "="
+            resType = getTypeOp(lType, '=', rType)
+
+            if resType == 'type_error':
+                failParse(resType, (numLine, lexN,))
+
+            tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')  # Оновлюємо тип змінної
+            postfixCodeGen('=', ('=', 'assign_op'))
+            if toView: configToPrint(lex, numRow)
+            postfixCLR_codeGen('=', lType)
+
+            res = True
+
+    elif lexT == ',':
+        parseToken(',', 'punct')
+        parseDeclaration()
+        type = tableOfConst[firstNumber][0]
+        resType = getTypeOp(lex, '=', type)
+        tableOfVar[lex] = (tableOfVar[lex][0], resType, 'assigned')
+        res = True
+
+    else:
+        res = False
+
+    isInitVar(lex)
+    indent = predIndt()
+    return resType, res
+
+
+def parseExpression():
+    global numRow
+    operator_stack = []  # Для зберігання операторів
+    operand_stack = []  # Для зберігання операндів (для генерації коду)
+
+    indent = nextIndt()
+    print(indent + 'parseExpression():')
+    numLine, lex, tok = getSymb()
+    lType = parseTerm()  # Починаємо з першого терма
+
+    if lType == 'id':
+        lType = getTypeVar(lex)
+        if lType == 'undeclared_variable':
+            failParse('використання неоголошеної змінної', (numLine, lex, tok))
+        elif tableOfVar[lex][2] == 'undefined':
+            failParse('використання змінної, що не набула значення', (numLine, lex, tok))
+        else:
+            lType = tableOfVar[lex][1]
+
+    operand_stack.append(lex)  # Додаємо операнд в стек
+    resType = lType
+
+    while True:
+        numLineT, lexT, tokT = getSymb()
+
+        if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):  # Якщо оператор
+            while operator_stack:
+                top_op, top_tok = operator_stack[-1]
+
+                # Перевіряємо, чи потрібно витягнути оператори зі стека
+                if should_pop_operator(top_op, lexT):
+                    operator_stack.pop()
+                    right_operand = operand_stack.pop()
+                    left_operand = operand_stack.pop()
+
+                    # Генерація коду для поточної операції
+                    postfixCodeGen(top_op, (top_op, top_tok))
+                    postfixCLR_codeGen(top_op, (top_op, top_tok))
+                    operand_stack.append(f"temp_{numRow}")  # Результат операції
+                else:
+                    break
+
+            operator_stack.append((lexT, tokT))  # Додаємо поточний оператор в стек
+            numRow += 1
+            rType = parseTerm()
+
+            if lexT == '/' and operand_stack[-1] == '0':  # Перевірка ділення на нуль
+                failParse('ділення на нуль', (numLineT, lexT, tokT))
+
+            if rType == 'id' and tableOfVar[operand_stack[-1]][2] == 'undefined':
+                failParse('використання змінної, що не набула значення', (numLineT, lexT, tokT))
+            elif rType == 'id':
+                rType = tableOfVar[operand_stack[-1]][1]
+
+            resType = getTypeOp(lType, lexT, rType)
+            if resType == 'type_error':
+                failParse('невідповідність типів', (numLineT, lType, lexT, rType))
+
+            operand_stack.append(f"temp_{numRow}")  # Додаємо результат в стек
+
+        elif tokT == 'open_paren':  # Відкриваюча дужка
+            operator_stack.append((lexT, tokT))
+        elif tokT == 'close_paren':  # Закриваюча дужка
+            while operator_stack and operator_stack[-1][0] != '(':
+                op, tok_op = operator_stack.pop()
+                right_operand = operand_stack.pop()
+                left_operand = operand_stack.pop()
+
+                # Генерація коду для операції
+                postfixCodeGen(op, (op, tok_op))
+                postfixCLR_codeGen(op, (op, tok_op))
+                operand_stack.append(f"temp_{numRow}")
+            operator_stack.pop()  # Прибираємо '(' зі стека
+
+        else:  # Кінець виразу
+            break
+
+    # Завершуємо обробку виразу
+    while operator_stack:
+        op, tok_op = operator_stack.pop()
+        right_operand = operand_stack.pop()
+        left_operand = operand_stack.pop()
+
+        # Генерація коду для залишкових операторів
+        postfixCodeGen(op, (op, tok_op))
+        postfixCLR_codeGen(op, (op, tok_op))
+        operand_stack.append(f"temp_{numRow}")
+
+    indent = predIndt()
+    return resType
+
 
 # def parseExpression():
 #     global numRow
@@ -774,103 +927,103 @@ def parseAssign():
 #
 
 
-def parseExpression():
-    global numRow
-    operator_stack = []  # Для зберігання операторів
-    operand_stack = []   # Для зберігання операндів (для генерації коду)
-
-    indent = nextIndt()
-    print(indent + 'parseExpression():')
-    numLine, lex, tok = getSymb()
-    lType = parseTerm()  # Починаємо з першого терма
-
-    if lType == 'id':
-        lType = getTypeVar(lex)
-        if lType == 'undeclared_variable':
-            failParse('використання неоголошеної змінної', (numLine, lex, tok))
-        elif tableOfVar[lex][2] == 'undefined':
-            failParse('використання змінної, що не набула значення', (numLine, lex, tok))
-        else:
-            lType = tableOfVar[lex][1]
-
-    operand_stack.append(lex)  # Додаємо операнд в стек
-    # postfixCLR_codeGen('const', (lex , lType))
-    resType = lType
-
-    F = True
-    while F:
-        numLineT, lexT, tokT = getSymb()
-
-        if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):  # Якщо оператор
-
-            # postfixCLR_codeGen(lexT, lexT)
-
-            while operator_stack:
-                top_op, top_tok = operator_stack[-1]
-
-                # Перевіряємо, чи потрібно витягнути оператори зі стека
-                if should_pop_operator(top_op, lexT):
-                    operator_stack.pop()
-                    right_operand = operand_stack.pop()
-                    left_operand = operand_stack.pop()
-
-                    # Генерація коду для поточної операції
-                    postfixCodeGen(top_op, (top_op, top_tok))
-                    print(top_op)
-
-                    postfixCLR_codeGen(top_op, (top_op, top_tok))
-                    operand_stack.append(f"temp_{numRow}")  # Результат операції
-                else:
-                    break
-
-            operator_stack.append((lexT, tokT))  # Додаємо поточний оператор в стек
-
-            numRow += 1
-            rType = parseTerm()
-
-            if lexT == '/' and operand_stack[-1] == '0':  # Перевірка ділення на нуль
-                failParse('ділення на нуль', (numLineT, lexT, tokT))
-
-            if rType == 'id' and tableOfVar[operand_stack[-1]][2] == 'undefined':
-                failParse('використання змінної, що не набула значення', (numLineT, lexT, tokT))
-            elif rType == 'id':
-                rType = tableOfVar[operand_stack[-1]][1]
-
-            resType = getTypeOp(lType, lexT, rType)
-            if resType == 'type_error':
-                failParse('невідповідність типів', (numLineT, lType, lexT, rType))
-
-            operand_stack.append(f"temp_{numRow}")  # Додаємо результат в стек
-
-        elif tokT == 'open_paren':  # Відкриваюча дужка
-            operator_stack.append((lexT, tokT))
-        elif tokT == 'close_paren':  # Закриваюча дужка
-            while operator_stack and operator_stack[-1][0] != '(':
-                op, tok_op = operator_stack.pop()
-                right_operand = operand_stack.pop()
-                left_operand = operand_stack.pop()
-
-                # Генерація коду для операції
-                postfixCodeGen(op, (op, tok_op))
-                operand_stack.append(f"temp_{numRow}")
-                postfixCLR_codeGen(op, (op, tok_op))
-            operator_stack.pop()  # Прибираємо '(' зі стека
-
-        else:
-            F = False
-
-    # Завершуємо обробку виразу
-    while operator_stack:
-        op, tok_op = operator_stack.pop()
-        right_operand = operand_stack.pop()
-        left_operand = operand_stack.pop()
-
-        # Генерація коду для залишкових операторів
-        postfixCodeGen(op, (op, tok_op))
-        operand_stack.append(f"temp_{numRow}")
-        postfixCLR_codeGen(op, (op, tok_op))
-    indent = predIndt()
-    return resType
+# def parseExpression():
+#     global numRow
+#     operator_stack = []  # Для зберігання операторів
+#     operand_stack = []   # Для зберігання операндів (для генерації коду)
+#
+#     indent = nextIndt()
+#     print(indent + 'parseExpression():')
+#     numLine, lex, tok = getSymb()
+#     lType = parseTerm()  # Починаємо з першого терма
+#
+#     if lType == 'id':
+#         lType = getTypeVar(lex)
+#         if lType == 'undeclared_variable':
+#             failParse('використання неоголошеної змінної', (numLine, lex, tok))
+#         elif tableOfVar[lex][2] == 'undefined':
+#             failParse('використання змінної, що не набула значення', (numLine, lex, tok))
+#         else:
+#             lType = tableOfVar[lex][1]
+#
+#     operand_stack.append(lex)  # Додаємо операнд в стек
+#     # postfixCLR_codeGen('const', (lex , lType))
+#     resType = lType
+#
+#     F = True
+#     while F:
+#         numLineT, lexT, tokT = getSymb()
+#
+#         if tokT in ('add_op', 'rel_op', 'mult_op', 'pow_op'):  # Якщо оператор
+#
+#             # postfixCLR_codeGen(lexT, lexT)
+#
+#             while operator_stack:
+#                 top_op, top_tok = operator_stack[-1]
+#
+#                 # Перевіряємо, чи потрібно витягнути оператори зі стека
+#                 if should_pop_operator(top_op, lexT):
+#                     operator_stack.pop()
+#                     right_operand = operand_stack.pop()
+#                     left_operand = operand_stack.pop()
+#
+#                     # Генерація коду для поточної операції
+#                     postfixCodeGen(top_op, (top_op, top_tok))
+#                     print(top_op)
+#
+#                     postfixCLR_codeGen(top_op, (top_op, top_tok))
+#                     operand_stack.append(f"temp_{numRow}")  # Результат операції
+#                 else:
+#                     break
+#
+#             operator_stack.append((lexT, tokT))  # Додаємо поточний оператор в стек
+#
+#             numRow += 1
+#             rType = parseTerm()
+#
+#             if lexT == '/' and operand_stack[-1] == '0':  # Перевірка ділення на нуль
+#                 failParse('ділення на нуль', (numLineT, lexT, tokT))
+#
+#             if rType == 'id' and tableOfVar[operand_stack[-1]][2] == 'undefined':
+#                 failParse('використання змінної, що не набула значення', (numLineT, lexT, tokT))
+#             elif rType == 'id':
+#                 rType = tableOfVar[operand_stack[-1]][1]
+#
+#             resType = getTypeOp(lType, lexT, rType)
+#             if resType == 'type_error':
+#                 failParse('невідповідність типів', (numLineT, lType, lexT, rType))
+#
+#             operand_stack.append(f"temp_{numRow}")  # Додаємо результат в стек
+#
+#         elif tokT == 'open_paren':  # Відкриваюча дужка
+#             operator_stack.append((lexT, tokT))
+#         elif tokT == 'close_paren':  # Закриваюча дужка
+#             while operator_stack and operator_stack[-1][0] != '(':
+#                 op, tok_op = operator_stack.pop()
+#                 right_operand = operand_stack.pop()
+#                 left_operand = operand_stack.pop()
+#
+#                 # Генерація коду для операції
+#                 postfixCodeGen(op, (op, tok_op))
+#                 operand_stack.append(f"temp_{numRow}")
+#                 postfixCLR_codeGen(op, (op, tok_op))
+#             operator_stack.pop()  # Прибираємо '(' зі стека
+#
+#         else:
+#             F = False
+#
+#     # Завершуємо обробку виразу
+#     while operator_stack:
+#         op, tok_op = operator_stack.pop()
+#         right_operand = operand_stack.pop()
+#         left_operand = operand_stack.pop()
+#
+#         # Генерація коду для залишкових операторів
+#         postfixCodeGen(op, (op, tok_op))
+#         operand_stack.append(f"temp_{numRow}")
+#         postfixCLR_codeGen(op, (op, tok_op))
+#     indent = predIndt()
+#     return resType
 
 
 
@@ -990,10 +1143,15 @@ def parseCaseBlock():
         postfixCodeGen(tok1, (lex1, tok1))
         postfixCodeGen('==', ('==', 'rel_op'))
 
+        postfixCLR_codeGen('rval', lexCase)
+        postfixCLR_codeGen(tok1, (lex1, tok1))
+        postfixCLR_codeGen('==', ('==', 'rel_op'))
+
         parseDigit() or parseIdent()
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
+        postfixCLR_codeGen('jf', 'm1')
 
         parseToken(':', 'punct')
 
@@ -1001,13 +1159,17 @@ def parseCaseBlock():
 
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
+        postfixCLR_codeGen('jump', 'm2')
 
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm1')
+
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm2')
 
         res = True
     else:
@@ -1177,7 +1339,7 @@ def parseFactor():
 
                 postfixCodeGen(lex, (lex, tok))
                 if toView: configToPrint(lex, numLine)
-                # postfixCLR_codeGen('const', (lex, tok))
+                #postfixCLR_codeGen('const', (lex, tok))
                 postfixCode.append(('NEG', 'neg_op'))
 
                 lex = str(-float(lex)) if '.' in lex else str(-int(lex))  # Застосовуємо унарний мінус
@@ -1197,7 +1359,7 @@ def parseFactor():
 
             postfixCodeGen('rval', (lex, 'rval'))
             if toView: configToPrint(lex, numRow)
-            postfixCLR_codeGen('const', (lex, 'rval'))
+            postfixCLR_codeGen('rval', lex)
         else:
             postfixCodeGen('const',(lex, tok))
             if toView: configToPrint(lex, numRow)
@@ -1387,11 +1549,13 @@ def parseIf():
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
+        postfixCLR_codeGen('jf', 'm1')
 
         parseStatementList()  # Виконуємо парсинг блоку if
 
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
+        postfixCLR_codeGen('jump', 'm2')
 
         m5 = None  # Ініціалізуємо змінну мітки для elif
         while True:
@@ -1399,6 +1563,8 @@ def parseIf():
             setValLabel(m1)
             postfixCode.append(m1)
             postfixCode.append((':', 'colon'))
+            postfixCLR_codeGen('label', 'm1')
+
             if lex == 'elif' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
                 numRow += 1
@@ -1409,10 +1575,12 @@ def parseIf():
                 m1 = createLabel()
                 postfixCode.append(m1)
                 postfixCode.append(('JF', 'jf'))
+                postfixCLR_codeGen('jf', 'm1')
 
                 parseStatementList()  # Парсинг блоку elif
                 postfixCode.append(m2)
                 postfixCode.append(('JMP', 'jump'))
+                postfixCLR_codeGen('jump', 'm2')
 
 
             # elif lex == 'else' and tok == 'keyword':
@@ -1443,6 +1611,7 @@ def parseIf():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm2')
         res = True
     else:
         res = False
@@ -1468,21 +1637,25 @@ def parseWhile():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm2')
         parseBoolExpr()
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
+        postfixCLR_codeGen('jf', 'm1')
 
         parseToken('do', 'keyword')
 
         parseStatementList()
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
+        postfixCLR_codeGen('jump', 'm2')
 
         parseToken('end', 'keyword')
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm1')
         res = True
     else:
         res = False
@@ -1507,31 +1680,37 @@ def parseUntil():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm2')
 
         parseBoolExpr()
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
+        postfixCLR_codeGen('jf', 'm1')
 
         postfixCode.append(m3)
         postfixCode.append(('JMP', 'jump'))
+        postfixCLR_codeGen('jump', 'm3')
 
         parseToken('do', 'keyword')
 
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm1')
 
         parseStatementList()
 
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
+        postfixCLR_codeGen('jump', 'm2')
 
 
         parseToken('end', 'keyword')
         setValLabel(m3)
         postfixCode.append(m3)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm3')
         res = True
     else:
         res = False
@@ -1579,6 +1758,8 @@ def parseFor():
         # Стартове значення змінної
         numLine1, lex1, tok1 = getSymb()
         postfixCodeGen('lval', (lex1, tok1))  # Записуємо значення лівої частини
+        postfixCLR_codeGen('lval', lex1)
+
         if toView: configToPrint(lex1, numLine1)
 
         parseIdent()  # Парсимо ідентифікатор
@@ -1589,27 +1770,36 @@ def parseFor():
         # Генерація коду для правої частини
         if firstTok == 'id':
             postfixCodeGen('rval', (firstLex, firstTok))
+            postfixCLR_codeGen('rval', firstLex)
         else:
             postfixCodeGen(firstTok, (firstLex, firstTok))
+            postfixCLR_codeGen(firstTok, (firstLex, firstTok))
         postfixCodeGen('=', ('=', 'assign_op'))  # Присвоєння значення
+        postfixCLR_codeGen('=', firstTok)
 
         # Мітка для перевірки умови циклу
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
+        postfixCLR_codeGen('label', 'm2')
 
         # Генерація коду для правої частини умови циклу
         if secondTok == 'id':
             postfixCodeGen('rval', (secondLex, secondTok))
+            postfixCLR_codeGen('rval', secondLex)
         else:
             postfixCodeGen(secondTok, (secondLex, secondTok))
+            postfixCLR_codeGen(secondTok, (secondLex, secondTok))
 
         postfixCodeGen('rval', (lex1, tok1))  # Записуємо значення правої частини
+        postfixCLR_codeGen('rval', lex1)
         if toView: configToPrint(lex1, numLine1)
         postfixCodeGen('>=', ('>=', 'rel_op'))  # Оператор порівняння
+        postfixCLR_codeGen('rel_op','>=' )
 
         postfixCode.append(m1)  # Мітка для переходу
         postfixCode.append(('JF', 'jf'))  # Перехід, якщо умова не виконується
+        postfixCLR_codeGen('jf', 'm1')
 
         # Обробка тіла циклу
         parseToken('do', 'keyword')  # Парсимо 'do'
@@ -1620,10 +1810,17 @@ def parseFor():
         postfixCodeGen('rval', (lex1, tok1))
         postfixCodeGen('1', ('1', 'int'))
         postfixCodeGen('+', ('+', 'add_op'))
-        postfixCodeGen('=', ('=', 'assign_op'))  # Оновлення лічильника циклу
+        postfixCodeGen('=', ('=', 'int'))  # Оновлення лічильника циклу
+
+        postfixCLR_codeGen('lval', lex1)
+        postfixCLR_codeGen('rval', lex1)
+        postfixCLR_codeGen('const', ('1', 'int'))
+        postfixCLR_codeGen('+', ('+', 'add_op'))
+        postfixCLR_codeGen('=',  'int')
 
         postfixCode.append(m2)  # Повернення до перевірки умови циклу
         postfixCode.append(('JMP', 'jump'))  # Перехід до перевірки умови циклу
+        postfixCLR_codeGen('jump', 'm2')
 
         # Завершення циклу
         parseToken('end', 'keyword')  # Парсимо 'end'
@@ -1632,6 +1829,7 @@ def parseFor():
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))  # Мітка завершення циклу
+        postfixCLR_codeGen('label', 'm1')
 
         res = True
     else:
@@ -1691,6 +1889,7 @@ def parseBoolExpr():
             numRow += 1
             parseTerm()  # Розбираємо терм після rel_op
             postfixCode.append((lex, tok))  # Додаємо в постфікс
+            postfixCLR_codeGen(lex, tok)
         elif tok in ('id', 'int', 'float', 'true', 'false', '('):  # Якщо це допустимий завершальний токен
             # postfixCode.append((lex, tok))
             F = False

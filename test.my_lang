@@ -1,6 +1,54 @@
+v ^ int
 b ^ int
+c ^ int
+k ^ int
+s ^ int
+u ^ int
+w ^ int
+inp1 ^ int
+inp2 ^ float
+i1 ^ int
+i2 ^ int
+i3 ^ int
+sw1 ^ int
+sw2 ^ int
+sw3 ^ int
+sw4 ^ int
+a ^ int
+exp1 ^ float
+exp2 ^ float
+exp3 ^ float
+d ^ float
 begin
 
 b = (7 - 2) + 1
+s=0.50
+
+u=0
+w=0
+
+sw1 = -2
+sw4 = 0
+
+if s == 4.50
+    s = s + 5
+else
+    s = s - 5
+end
+
+d = 10.0
+
+while w < 5 do
+  w = w + 1
+end
+
+until u == 10 do
+  u = u + 2
+end
+
+for sw1 in [6 .. 7] do
+  sw4 = sw4 + 1
+  puts "sw4"
+end
 
 finish

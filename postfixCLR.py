@@ -13,6 +13,8 @@ def relopCLR(lex):
     if lex == '<' : relopCLR = 'clt'
     if lex == '>': relopCLR = 'cgt'
     if lex == '==': relopCLR = 'ceq'
+    if lex == '<=': relopCLR = 'cgt'
+    if lex == '>=': relopCLR = 'clt'
     return relopCLR
 
 def postfixCLR_codeGen(case,toTran):
@@ -53,10 +55,10 @@ def postfixCLR_codeGen(case,toTran):
         postfixCodeCLR.append(tl+relop)
     elif case == 'jf':
         lex = toTran
-        postfixCodeCLR.append(tl + 'brfalse' + lex)
+        postfixCodeCLR.append(tl + 'brfalse' + tl + lex)
     elif case == 'jump':
         lex = toTran
-        postfixCodeCLR.append(tl + 'br' + lex)
+        postfixCodeCLR.append(tl + 'br' + tl + lex)
     elif case == 'label':
         lex = toTran + ':'
         postfixCodeCLR.append(lex)
