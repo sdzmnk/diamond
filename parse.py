@@ -1151,7 +1151,7 @@ def parseCaseBlock():
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
-        postfixCLR_codeGen('jf', 'm1')
+        postfixCLR_codeGen('jf', m1[0] )
 
         parseToken(':', 'punct')
 
@@ -1159,17 +1159,17 @@ def parseCaseBlock():
 
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
-        postfixCLR_codeGen('jump', 'm2')
+        postfixCLR_codeGen('jump', m2[0] )
 
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm1')
+        postfixCLR_codeGen('label', m1[0] )
 
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm2')
+        postfixCLR_codeGen('label', m2[0] )
 
         res = True
     else:
@@ -1549,13 +1549,13 @@ def parseIf():
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
-        postfixCLR_codeGen('jf', 'm1')
+        postfixCLR_codeGen('jf', m1[0] )
 
         parseStatementList()  # Виконуємо парсинг блоку if
 
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
-        postfixCLR_codeGen('jump', 'm2')
+        postfixCLR_codeGen('jump', m2[0] )
 
         m5 = None  # Ініціалізуємо змінну мітки для elif
         while True:
@@ -1563,7 +1563,7 @@ def parseIf():
             setValLabel(m1)
             postfixCode.append(m1)
             postfixCode.append((':', 'colon'))
-            postfixCLR_codeGen('label', 'm1')
+            postfixCLR_codeGen('label', m1[0] )
 
             if lex == 'elif' and tok == 'keyword':
                 print(indent + 'в рядку {0} - токен {1}'.format(numLine, (lex, tok)))
@@ -1575,12 +1575,12 @@ def parseIf():
                 m1 = createLabel()
                 postfixCode.append(m1)
                 postfixCode.append(('JF', 'jf'))
-                postfixCLR_codeGen('jf', 'm1')
+                postfixCLR_codeGen('jf', m1[0] )
 
                 parseStatementList()  # Парсинг блоку elif
                 postfixCode.append(m2)
                 postfixCode.append(('JMP', 'jump'))
-                postfixCLR_codeGen('jump', 'm2')
+                postfixCLR_codeGen('jump', m2[0] )
 
 
             # elif lex == 'else' and tok == 'keyword':
@@ -1611,7 +1611,7 @@ def parseIf():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm2')
+        postfixCLR_codeGen('label', m2[0] )
         res = True
     else:
         res = False
@@ -1637,25 +1637,25 @@ def parseWhile():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm2')
+        postfixCLR_codeGen('label', m2[0] )
         parseBoolExpr()
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
-        postfixCLR_codeGen('jf', 'm1')
+        postfixCLR_codeGen('jf', m1[0] )
 
         parseToken('do', 'keyword')
 
         parseStatementList()
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
-        postfixCLR_codeGen('jump', 'm2')
+        postfixCLR_codeGen('jump', m2[0] )
 
         parseToken('end', 'keyword')
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm1')
+        postfixCLR_codeGen('label', m1[0] )
         res = True
     else:
         res = False
@@ -1680,37 +1680,37 @@ def parseUntil():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm2')
+        postfixCLR_codeGen('label', m2[0] )
 
         parseBoolExpr()
 
         postfixCode.append(m1)
         postfixCode.append(('JF', 'jf'))
-        postfixCLR_codeGen('jf', 'm1')
+        postfixCLR_codeGen('jf', m1[0] )
 
         postfixCode.append(m3)
         postfixCode.append(('JMP', 'jump'))
-        postfixCLR_codeGen('jump', 'm3')
+        postfixCLR_codeGen('jump', m3[0] )
 
         parseToken('do', 'keyword')
 
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm1')
+        postfixCLR_codeGen('label', m1[0] )
 
         parseStatementList()
 
         postfixCode.append(m2)
         postfixCode.append(('JMP', 'jump'))
-        postfixCLR_codeGen('jump', 'm2')
+        postfixCLR_codeGen('jump', m2[0] )
 
 
         parseToken('end', 'keyword')
         setValLabel(m3)
         postfixCode.append(m3)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm3')
+        postfixCLR_codeGen('label', m3[0] )
         res = True
     else:
         res = False
@@ -1781,7 +1781,7 @@ def parseFor():
         setValLabel(m2)
         postfixCode.append(m2)
         postfixCode.append((':', 'colon'))
-        postfixCLR_codeGen('label', 'm2')
+        postfixCLR_codeGen('label', m2[0] )
 
         # Генерація коду для правої частини умови циклу
         if secondTok == 'id':
@@ -1799,7 +1799,7 @@ def parseFor():
 
         postfixCode.append(m1)  # Мітка для переходу
         postfixCode.append(('JF', 'jf'))  # Перехід, якщо умова не виконується
-        postfixCLR_codeGen('jf', 'm1')
+        postfixCLR_codeGen('jf', m1[0] )
 
         # Обробка тіла циклу
         parseToken('do', 'keyword')  # Парсимо 'do'
@@ -1820,7 +1820,7 @@ def parseFor():
 
         postfixCode.append(m2)  # Повернення до перевірки умови циклу
         postfixCode.append(('JMP', 'jump'))  # Перехід до перевірки умови циклу
-        postfixCLR_codeGen('jump', 'm2')
+        postfixCLR_codeGen('jump', m2[0] )
 
         # Завершення циклу
         parseToken('end', 'keyword')  # Парсимо 'end'
@@ -1829,7 +1829,7 @@ def parseFor():
         setValLabel(m1)
         postfixCode.append(m1)
         postfixCode.append((':', 'colon'))  # Мітка завершення циклу
-        postfixCLR_codeGen('label', 'm1')
+        postfixCLR_codeGen('label', m1[0] )
 
         res = True
     else:
@@ -1889,13 +1889,16 @@ def parseBoolExpr():
             numRow += 1
             parseTerm()  # Розбираємо терм після rel_op
             postfixCode.append((lex, tok))  # Додаємо в постфікс
-            postfixCLR_codeGen(lex, tok)
+            postfixCLR_codeGen('rel_op', lex)
+
         elif tok in ('id', 'int', 'float', 'true', 'false', '('):  # Якщо це допустимий завершальний токен
             # postfixCode.append((lex, tok))
             F = False
         else:  # Якщо нічого не підходить, завершуємо
             failParse('mismatch in BoolExpr', (numLine, lex, tok, 'rel_op'))
             F = False
+
+
 
     indent = predIndt()  # Зменшуємо відступ
     return True

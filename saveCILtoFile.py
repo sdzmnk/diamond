@@ -36,8 +36,8 @@ def saveCIL(fileName,tableOfVar,postfixCodeCLR):
     index,tp,_ = tableOfVar[x]
     if tp == 'int': tpil = 'int32' 
     else: tpil = 'float32'
+    localVars += "       [{0}]  {1} {2}".format(index-1,tpil, x) + comma + "\n"
     if index == cntVars-1: comma = "\n     )"
-    localVars += "       [{0}]  {1} {2}".format(index-0,tpil, x) + comma + "\n"
   # print((x,a))
   entrypoint = """
    .entrypoint
@@ -48,13 +48,13 @@ def saveCIL(fileName,tableOfVar,postfixCodeCLR):
     
   # виведення значень усіх змінних
   values = ""
-  # for x in tableOfVar:
-    # values += "\t" + 'ldstr "' + x + ' = "\n'
-    # values += "\t" + "call void [mscorlib]System.Console::Write(string) \n"
-    # _,tp,_ = tableOfVar[x]
-    # tp += '32'
-    # values += "\t" + "ldloc  " + x + "\n"
-    # values += "\t" + "call void [mscorlib]System.Console::WriteLine(" +tp + ") \n" 
+  for x in tableOfVar:
+    values += "\t" + 'ldstr "' + x + ' = "\n'
+    values += "\t" + "call void [mscorlib]System.Console::Write(string) \n"
+    _,tp,_ = tableOfVar[x]
+    tp += '32'
+    values += "\t" + "ldloc  " + x + "\n"
+    values += "\t" + "call void [mscorlib]System.Console::WriteLine(" +tp + ") \n"
     
   f.write(header + localVars + entrypoint +code + values +"\tret    \n}\n}")
   f.close()

@@ -13,8 +13,8 @@ def relopCLR(lex):
     if lex == '<' : relopCLR = 'clt'
     if lex == '>': relopCLR = 'cgt'
     if lex == '==': relopCLR = 'ceq'
-    if lex == '<=': relopCLR = 'cgt'
-    if lex == '>=': relopCLR = 'clt'
+    if lex == '<=': relopCLR = 'clt'
+    if lex == '>=': relopCLR = 'cgt'
     return relopCLR
 
 def postfixCLR_codeGen(case,toTran):
