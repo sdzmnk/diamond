@@ -8,7 +8,7 @@ w ^ int
 inp1 ^ int
 inp2 ^ float
 i1 ^ int
-i2 ^ int
+i2 ^ float
 i3 ^ int
 sw1 ^ int
 sw2 ^ int
@@ -56,7 +56,7 @@ end
 puts 1
 puts "u"
 
-i1, i2, i3 = 1, 2, 9
+i1, i2, i3 = 1, 3.0, 9
 
 sw1 = -2
 
@@ -82,9 +82,9 @@ do
         puts 366
 end
 
-exp1 = 2.02.02.0
-exp2 = 1.0+2.02.03.0 -4.0/5.0 - 6.0*2.0
-exp3 = (10.0 - 3.0) * (4.0 + 2.0)/3.0
+exp1 = 2**2**2
+exp2 = 1+2**2**3 -4/5 - 6*2
+exp3 = (10 - 3) * (4 + 2)/3
 
 puts "exp1"
 puts "exp2"

@@ -722,7 +722,6 @@ def parseAssign():
     lType = getTypeVar(lex)
 
     postfixCodeGen('lval', (lex, tok))
-
     postfixCLR_codeGen('lval', lex)
 
     if toView: configToPrint(lex, numRow)
@@ -741,6 +740,8 @@ def parseAssign():
         else:
             rType = parseExpression()  # Обробляємо вираз праворуч від знаку "="
             resType = getTypeOp(lType, '=', rType)
+
+
 
             if resType == 'type_error':
                 failParse(resType, (numLine, lexN,))
@@ -765,6 +766,8 @@ def parseAssign():
 
     isInitVar(lex)
     indent = predIndt()
+
+
     return resType, res
 
 
@@ -790,6 +793,7 @@ def parseExpression():
     operand_stack.append(lex)  # Додаємо операнд в стек
     resType = lType
 
+
     while True:
         numLineT, lexT, tokT = getSymb()
 
@@ -813,6 +817,7 @@ def parseExpression():
             operator_stack.append((lexT, tokT))  # Додаємо поточний оператор в стек
             numRow += 1
             rType = parseTerm()
+
 
             if lexT == '/' and operand_stack[-1] == '0':  # Перевірка ділення на нуль
                 failParse('ділення на нуль', (numLineT, lexT, tokT))
@@ -1144,8 +1149,8 @@ def parseCaseBlock():
         postfixCodeGen('==', ('==', 'rel_op'))
 
         postfixCLR_codeGen('rval', lexCase)
-        postfixCLR_codeGen(tok1, (lex1, tok1))
-        postfixCLR_codeGen('==', ('==', 'rel_op'))
+        postfixCLR_codeGen('const', (lex1, tok1))
+        postfixCLR_codeGen('rel_op', '==')
 
         parseDigit() or parseIdent()
 
@@ -1773,7 +1778,7 @@ def parseFor():
             postfixCLR_codeGen('rval', firstLex)
         else:
             postfixCodeGen(firstTok, (firstLex, firstTok))
-            postfixCLR_codeGen(firstTok, (firstLex, firstTok))
+            postfixCLR_codeGen('const', (firstLex, firstTok))
         postfixCodeGen('=', ('=', 'assign_op'))  # Присвоєння значення
         postfixCLR_codeGen('=', firstTok)
 
@@ -1789,7 +1794,7 @@ def parseFor():
             postfixCLR_codeGen('rval', secondLex)
         else:
             postfixCodeGen(secondTok, (secondLex, secondTok))
-            postfixCLR_codeGen(secondTok, (secondLex, secondTok))
+            postfixCLR_codeGen('const', (secondLex, secondTok))
 
         postfixCodeGen('rval', (lex1, tok1))  # Записуємо значення правої частини
         postfixCLR_codeGen('rval', lex1)
@@ -2009,11 +2014,14 @@ def parseExpressionList():
     parseExpression()
 
     postfixCodeGen('=', ('=', 'assign_op'))
+    postfixCLR_codeGen('=', tok)
     # Поки є символи коми, продовжуємо розбір виражень
     while True:
         numLine, lex, tok = getSymb()  # Отримуємо наступний токен
         if tok == 'punct' and lex == ',':
             postfixCodeGen('lval', (lex10, tok10))
+            postfixCLR_codeGen('lval', lex10)
+
             parseToken(',', 'punct')  # Розбираємо кому
             resType.append(parseExpression())  # Додаємо наступний вираз до списку
             i = int(tableOfVar[lex10][0]) + 1
@@ -2022,6 +2030,12 @@ def parseExpressionList():
                     lex10 = key
                     break
             postfixCodeGen('=', ('=', 'assign_op'))
+            for item in resType:
+                if isinstance(item, str):  # Проверяем, является ли элемент строкой
+                    print(item)
+            postfixCLR_codeGen('=', item)
+
+
         else:
             # Якщо токен не кома, виходимо з циклу
             break

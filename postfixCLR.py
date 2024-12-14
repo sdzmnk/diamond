@@ -8,14 +8,14 @@ def suffixTypeCLR(Type):
     elif Type == 'float':
         return 'r4'
 
-def relopCLR(lex):
-    global relopCLR
-    if lex == '<' : relopCLR = 'clt'
-    if lex == '>': relopCLR = 'cgt'
-    if lex == '==': relopCLR = 'ceq'
-    if lex == '<=': relopCLR = 'clt'
-    if lex == '>=': relopCLR = 'cgt'
-    return relopCLR
+# def relopCLR(lex):
+#     global relopCLR
+#     if lex == '<' : relopCLR = 'clt'
+#     if lex == '>': relopCLR = 'cgt'
+#     if lex == '==': relopCLR = 'ceq'
+#     if lex == '<=': relopCLR = 'clt'
+#     if lex == '>=': relopCLR = 'cgt'
+#     return relopCLR
 
 def postfixCLR_codeGen(case,toTran):
     global val
@@ -51,8 +51,15 @@ def postfixCLR_codeGen(case,toTran):
         postfixCodeCLR.append(tl + 'ldc.i4' + val)
     elif case == 'rel_op':
         lex = toTran
-        relop = relopCLR(lex)
-        postfixCodeCLR.append(tl+relop)
+
+        relopCLR = ''
+        if lex == '<': relopCLR = 'clt'
+        if lex == '>': relopCLR = 'cgt'
+        if lex == '==': relopCLR = 'ceq'
+        if lex == '<=': relopCLR = 'clt'
+        if lex == '>=': relopCLR = 'cgt'
+        postfixCodeCLR.append(tl+relopCLR)
+
     elif case == 'jf':
         lex = toTran
         postfixCodeCLR.append(tl + 'brfalse' + tl + lex)

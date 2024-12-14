@@ -1,19 +1,84 @@
-a ^ int
+v ^ int
 b ^ int
 c ^ int
 k ^ int
-v ^ int
+s ^ int
+u ^ int
+w ^ int
+inp1 ^ int
+inp2 ^ float
+i1 ^ int
+i2 ^ float
+i3 ^ int
+sw1 ^ int
+sw2 ^ int
+sw3 ^ int
+sw4 ^ int
+a ^ int
+exp1 ^ float
+exp2 ^ float
+exp3 ^ float
 begin
 
-b = 3
-c = 0
-k = 0
-v = 0
+
+b=3
+c=3
+k=0
+v=0
+s=1
+u=0
+w=0
+exp1=0
+exp2 = 0
 
 if b==1
-    v=1
+    if c==1
+        k=11
+    elif c==2
+        k=22
+    else
+        k=33
+    end
+elif b==3
+    v=2
 else
   v=4
 end
+
+while w < 5 do
+  w = w + 1
+end
+
+until u == 10 do
+  u = u + 2
+end
+
+i1, i2, i3 = 1, 3.0, 9
+
+sw1 = 2
+
+sw2 = 8
+
+sw3 = 8
+sw4 = 0
+
+for sw1 in [6 .. 7] do
+  sw4 = sw4 + 1
+end
+
+a = 2
+
+switch a
+do
+    case 1:
+        sw4 =  166
+    case 2:
+        sw4 = 266
+    case 3:
+        sw4 =  366
+end
+
+
+
 
 finish
