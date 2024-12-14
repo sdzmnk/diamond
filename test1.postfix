@@ -3,63 +3,52 @@
 
 .vars(
    a     int        
+   b     int        
    c     int        
-   s     float      
-   d     float      
+   k     int        
+   v     int        
 )
 
 .labels(
-   m1    25 
-   m2    32 
+   m1    22 
+   m2    27 
 )
 
 .constants(
-10    int        
-2     int        
-200   int        
-0.5   float      
-1.0   float      
-4.50  float      
-5     int        
-10.0  float      
+3     int        
+0     int        
+1     int        
+4     int        
 )
 
 .code(
-   a     l-val 
-   10    int   
-   2     int   
-   +     add_op
+   b     l-val 
+   3     int   
    =     assign_op
    c     l-val 
-   200   int   
+   0     int   
    =     assign_op
-   s     l-val 
-   0.5   float 
-   1.0   float 
-   /     mult_op
+   k     l-val 
+   0     int   
    =     assign_op
-   s     r-val 
-   4.50  float 
+   v     l-val 
+   0     int   
+   =     assign_op
+   b     r-val 
+   1     int   
    ==    rel_op
    m1    label 
    JF    jf    
-   s     l-val 
-   s     r-val 
-   0.5   float 
-   +     add_op
+   v     l-val 
+   1     int   
    =     assign_op
    m2    label 
    JMP   jump  
    m1    label 
    :     colon 
-   s     l-val 
-   s     r-val 
-   5     int   
-   -     add_op
+   v     l-val 
+   4     int   
    =     assign_op
    m2    label 
    :     colon 
-   d     l-val 
-   10.0  float 
-   =     assign_op
 )

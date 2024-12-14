@@ -41,7 +41,7 @@ def saveCIL(fileName,tableOfVar,postfixCodeCLR):
   # print((x,a))
   entrypoint = """
    .entrypoint
-   //.maxstack  8\n"""
+   //.maxstack  16\n"""
   code = ""
   for instr in postfixCodeCLR:
     code += instr + "\n"

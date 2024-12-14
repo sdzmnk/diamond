@@ -23,62 +23,59 @@
     {
     .locals (
        [0]  int32 a,
-       [1]  int32 c,
-       [2]  float32 s,
-       [3]  float32 d
+       [1]  int32 b,
+       [2]  int32 c,
+       [3]  int32 k,
+       [4]  int32 v
      )
 
    .entrypoint
    //.maxstack  8
-    ldloca    a
-    ldc.i4    10
-    ldc.i4    2
-    add
+    ldloca    b
+    ldc.i4    3
     stind.i4
     ldloca    c
-    ldc.i4    200
+    ldc.i4    0
     stind.i4
-    ldloca    s
-    ldc.r4    0.5
-    ldc.r4    1.0
-    div
-    stind.r4
-    ldloc    s
-    ldc.r4    4.50
+    ldloca    k
+    ldc.i4    0
+    stind.i4
+    ldloca    v
+    ldc.i4    0
+    stind.i4
+    ldloc    b
+    ldc.i4    1
     ceq
     brfalse    m1
-    ldloca    s
-    ldloc    s
-    ldc.r4    0.5
-    add
-    stind.r4
+    ldloca    v
+    ldc.i4    1
+    stind.i4
     br    m2
 m1:
-    ldloca    s
-    ldloc    s
-    ldc.i4    5
-    sub
-    stind.r4
+    ldloca    v
+    ldc.i4    4
+    stind.i4
 m2:
-    ldloca    d
-    ldc.r4    10.0
-    stind.r4
 	ldstr "a = "
 	call void [mscorlib]System.Console::Write(string) 
 	ldloc  a
+	call void [mscorlib]System.Console::WriteLine(int32) 
+	ldstr "b = "
+	call void [mscorlib]System.Console::Write(string) 
+	ldloc  b
 	call void [mscorlib]System.Console::WriteLine(int32) 
 	ldstr "c = "
 	call void [mscorlib]System.Console::Write(string) 
 	ldloc  c
 	call void [mscorlib]System.Console::WriteLine(int32) 
-	ldstr "s = "
+	ldstr "k = "
 	call void [mscorlib]System.Console::Write(string) 
-	ldloc  s
-	call void [mscorlib]System.Console::WriteLine(float32) 
-	ldstr "d = "
+	ldloc  k
+	call void [mscorlib]System.Console::WriteLine(int32) 
+	ldstr "v = "
 	call void [mscorlib]System.Console::Write(string) 
-	ldloc  d
-	call void [mscorlib]System.Console::WriteLine(float32) 
+	ldloc  v
+	call void [mscorlib]System.Console::WriteLine(int32) 
 	ret    
 }
 }
