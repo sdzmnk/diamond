@@ -41,7 +41,9 @@
        [16]  int32 a,
        [17]  int32 exp1,
        [18]  int32 exp2,
-       [19]  float32 exp3
+       [19]  float32 exp3,
+       [20]  int32 test,
+       [21]  int32 inp
      )
 
    .entrypoint
@@ -73,6 +75,18 @@
     ldloca    exp2
     ldc.i4    0
     stind.r4
+    ldloca    test
+    ldc.i4    1
+    neg
+    ldc.i4    1
+    neg
+    sub
+    stind.i4
+    ldloca    inp
+     call string [mscorlib] System.Console::ReadLine()
+    call int32 [mscorlib]System.Convert::ToInt32(string)
+	stloc  inp
+
     ldloc    b
     ldc.i4    1
     ceq
@@ -294,6 +308,14 @@ m22:
 	call void [mscorlib]System.Console::Write(string) 
 	ldloc  exp3
 	call void [mscorlib]System.Console::WriteLine(float32) 
+	ldstr "test = "
+	call void [mscorlib]System.Console::Write(string) 
+	ldloc  test
+	call void [mscorlib]System.Console::WriteLine(int32) 
+	ldstr "inp = "
+	call void [mscorlib]System.Console::Write(string) 
+	ldloc  inp
+	call void [mscorlib]System.Console::WriteLine(int32) 
 	ret    
 }
 }

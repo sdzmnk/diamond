@@ -378,12 +378,14 @@ def parseInp():
             parseToken('to_i', 'keyword')
             resType = 'int'
             postfixCode.append(('INP', 'inp_op'))
+            postfixCLR_codeGen('input', 'inp')
             res = True
         elif lex == 'to_f':
 
             parseToken('to_f', 'keyword')
             resType = 'float'
             postfixCode.append(('INP', 'inp_op'))
+            postfixCLR_codeGen('input', 'float')
             res = True
 
         else:
@@ -1344,8 +1346,9 @@ def parseFactor():
 
                 postfixCodeGen(lex, (lex, tok))
                 if toView: configToPrint(lex, numLine)
-                #postfixCLR_codeGen('const', (lex, tok))
+                postfixCLR_codeGen('const', (lex, tok))
                 postfixCode.append(('NEG', 'neg_op'))
+                postfixCLR_codeGen('neg_op', lex)
 
                 lex = str(-float(lex)) if '.' in lex else str(-int(lex))  # Застосовуємо унарний мінус
 
@@ -1932,6 +1935,7 @@ def parseOut():
 
             postfixCode.append((next_lex, 'int'))
             postfixCode.append(('OUT', 'out_op'))
+            postfixCLR_codeGen('out', next_lex )
 
             res = True
             #
@@ -1951,6 +1955,7 @@ def parseOut():
             if parseIdent():
                 postfixCode.append((lexO, 'r-val'))
                 postfixCode.append(('OUT', 'out_op'))
+                postfixCLR_codeGen('out_op', lexO)
                 # Перевіряємо на закриваючі лапки
                 if parseToken('"', 'punct'):
                     res = True

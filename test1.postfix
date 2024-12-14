@@ -22,31 +22,33 @@
    exp1  int        
    exp2  int        
    exp3  float      
+   test  int        
+   inp   int        
 )
 
 .labels(
-   m1    63 
-   m2    80 
-   m3    42 
-   m4    59 
-   m5    54 
-   m6    75 
-   m7    96 
-   m8    82 
-   m9   107 
-   m10   98 
-   m11  116 
-   m12  161 
-   m13  142 
+   m1    72 
+   m2    89 
+   m3    51 
+   m4    68 
+   m5    63 
+   m6    84 
+   m7   105 
+   m8    91 
+   m9   116 
+   m10  107 
+   m11  125 
+   m12  170 
+   m13  151 
    m14 val_undef 
    m15 val_undef 
    m16 val_undef 
-   m17  176 
-   m18  178 
-   m19  190 
-   m20  192 
-   m21  204 
-   m22  206 
+   m17  185 
+   m18  187 
+   m19  199 
+   m20  201 
+   m21  213 
+   m22  215 
    m23 val_undef 
    m24 val_undef 
 )
@@ -100,6 +102,15 @@
    exp2  l-val 
    0     int   
    =     assign_op
+   test  l-val 
+   1     int   
+   NEG   neg_op
+   1     int   
+   NEG   neg_op
+   -     add_op
+   =     assign_op
+   inp   l-val 
+   INP   inp_op
    b     r-val 
    1     int   
    ==    rel_op

@@ -18,6 +18,8 @@ a ^ int
 exp1 ^ float
 exp2 ^ float
 exp3 ^ float
+test ^ int
+inp ^ int
 begin
 
 
@@ -30,6 +32,9 @@ u=0
 w=0
 exp1=0
 exp2 = 0
+test = -1 - -1
+
+inp = gets.to_i
 
 if b==1
     if c==1
@@ -82,3 +87,4 @@ end
 
 
 finish
+

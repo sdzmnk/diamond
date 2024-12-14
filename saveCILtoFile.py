@@ -56,6 +56,6 @@ def saveCIL(fileName,tableOfVar,postfixCodeCLR):
     values += "\t" + "ldloc  " + x + "\n"
     values += "\t" + "call void [mscorlib]System.Console::WriteLine(" +tp + ") \n"
     
-  f.write(header + localVars + entrypoint +code + values +"\tret    \n}\n}")
+  f.write(header + localVars + entrypoint + code  + values +"\tret    \n}\n}")
   f.close()
   print(f"IL-програма для CLR збережена у файлі {fname}")

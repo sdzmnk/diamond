@@ -1,3 +1,4 @@
+from Tools.scripts.make_ctype import values
 
 postfixCodeCLR = []
 tl = "    "
@@ -36,6 +37,9 @@ def postfixCLR_codeGen(case,toTran):
         postfixCodeCLR.append(tl + 'mul')
     elif case == '/':
         postfixCodeCLR.append(tl + 'div')
+    elif case == 'neg_op':
+        postfixCodeCLR.append(tl + 'neg')
+
     elif case == 'rval':
         lex = toTran
         # postfixCodeCLR.append(tl + 'ldloca'+ tb('ldloca') + lex)
@@ -69,5 +73,34 @@ def postfixCLR_codeGen(case,toTran):
     elif case == 'label':
         lex = toTran + ':'
         postfixCodeCLR.append(lex)
+
+    elif case == 'out_op':
+        values = ""
+        lex = toTran
+
+        tp = "int"
+        tp += '32'
+        values += "\t" + "ldloc  " + lex + "\n"
+        values += "\t" + "call void [mscorlib]System.Console::WriteLine(" + tp + ") \n"
+
+        postfixCodeCLR.append(values)
+
+    elif case == 'out':
+        values = ""
+        lex = toTran
+        values += "\tldstr \"" + lex + "\"\n"
+        values += "\tcall void [mscorlib]System.Console::Write(string) \n"
+
+        postfixCodeCLR.append(values)
+
+
+    elif case == 'input':
+        lex = toTran
+        postfixCodeCLR.append(tl + ' call string [mscorlib] System.Console::ReadLine()')
+
+        postfixCodeCLR.append(tl + 'call int32 [mscorlib]System.Convert::ToInt32(string)')
+
+        postfixCodeCLR.append("\t" + "stloc  " + lex + "\n")
+
     return True
 
