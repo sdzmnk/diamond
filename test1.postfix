@@ -9,8 +9,6 @@
    s     int        
    u     int        
    w     int        
-   inp1  int        
-   inp2  float      
    i1    int        
    i2    float      
    i3    int        
@@ -19,277 +17,44 @@
    sw3   int        
    sw4   int        
    a     int        
-   exp1  int        
+   exp1  float      
    exp2  int        
-   exp3  float      
+   exp3  type_error 
    test  int        
-   inp   int        
+   inp1  int        
+   inp2  float      
 )
 
 .labels(
-   m1    72 
-   m2    89 
-   m3    51 
-   m4    68 
-   m5    63 
-   m6    84 
-   m7   105 
-   m8    91 
-   m9   116 
-   m10  107 
-   m11  125 
-   m12  170 
-   m13  151 
-   m14 val_undef 
-   m15 val_undef 
-   m16 val_undef 
-   m17  185 
-   m18  187 
-   m19  199 
-   m20  201 
-   m21  213 
-   m22  215 
-   m23 val_undef 
-   m24 val_undef 
 )
 
 .constants(
-3     int        
-0     int        
-1     int        
 11    int        
+1     int        
+3     int        
 2     int        
-22    int        
-33    int        
-4     int        
-5     int        
 10    int        
-3.0   float      
-9     int        
-8     int        
-6     int        
-7     int        
-166   int        
-266   int        
-366   int        
+4     int        
 )
 
 .code(
-   b     l-val 
-   3     int   
-   =     assign_op
-   c     l-val 
-   3     int   
-   =     assign_op
-   k     l-val 
-   0     int   
-   =     assign_op
-   v     l-val 
-   0     int   
-   =     assign_op
-   s     l-val 
-   1     int   
-   =     assign_op
-   u     l-val 
-   0     int   
-   =     assign_op
-   w     l-val 
-   0     int   
-   =     assign_op
-   exp1  l-val 
-   0     int   
-   =     assign_op
    exp2  l-val 
-   0     int   
-   =     assign_op
-   test  l-val 
-   1     int   
-   NEG   neg_op
-   1     int   
-   NEG   neg_op
-   -     add_op
-   =     assign_op
-   inp   l-val 
-   INP   inp_op
-   b     r-val 
-   1     int   
-   ==    rel_op
-   m1    label 
-   JF    jf    
-   c     r-val 
-   1     int   
-   ==    rel_op
-   m3    label 
-   JF    jf    
-   k     l-val 
    11    int   
    =     assign_op
-   m4    label 
-   JMP   jump  
-   m3    label 
-   :     colon 
-   c     r-val 
-   2     int   
-   ==    rel_op
-   m5    label 
-   JF    jf    
-   k     l-val 
-   22    int   
-   =     assign_op
-   m4    label 
-   JMP   jump  
-   m5    label 
-   :     colon 
-   k     l-val 
-   33    int   
-   =     assign_op
-   m4    label 
-   :     colon 
-   m2    label 
-   JMP   jump  
-   m1    label 
-   :     colon 
-   b     r-val 
-   3     int   
-   ==    rel_op
-   m6    label 
-   JF    jf    
-   v     l-val 
-   2     int   
-   =     assign_op
-   m2    label 
-   JMP   jump  
-   m6    label 
-   :     colon 
-   v     l-val 
-   4     int   
-   =     assign_op
-   m2    label 
-   :     colon 
-   m8    label 
-   :     colon 
-   w     r-val 
-   5     int   
-   <     rel_op
-   m7    label 
-   JF    jf    
-   w     l-val 
-   w     r-val 
+   exp2  l-val 
    1     int   
+   3     int   
    +     add_op
+   2     int   
+   -     add_op
    =     assign_op
-   m8    label 
-   JMP   jump  
-   m7    label 
-   :     colon 
-   m10   label 
-   :     colon 
-   u     r-val 
+   exp3  l-val 
    10    int   
-   ==    rel_op
-   m9    label 
-   JF    jf    
-   m11   label 
-   JMP   jump  
-   m9    label 
-   :     colon 
-   u     l-val 
-   u     r-val 
-   2     int   
-   +     add_op
-   =     assign_op
-   m10   label 
-   JMP   jump  
-   m11   label 
-   :     colon 
-   i1    l-val 
-   1     int   
-   =     assign_op
-   i2    l-val 
-   3.0   float 
-   =     assign_op
-   i3    l-val 
-   9     int   
-   =     assign_op
-   sw1   l-val 
-   2     int   
-   =     assign_op
-   sw2   l-val 
-   8     int   
-   =     assign_op
-   sw3   l-val 
-   8     int   
-   =     assign_op
-   sw4   l-val 
-   0     int   
-   =     assign_op
-   sw1   l-val 
-   6     int   
-   =     assign_op
-   m13   label 
-   :     colon 
-   7     int   
-   sw1   r-val 
-   >=    rel_op
-   m12   label 
-   JF    jf    
-   sw4   l-val 
-   sw4   r-val 
-   1     int   
-   +     add_op
-   =     assign_op
-   sw1   l-val 
-   sw1   r-val 
-   1     int   
-   +     add_op
-   =     int   
-   m13   label 
-   JMP   jump  
-   m12   label 
-   :     colon 
-   a     l-val 
-   2     int   
-   =     assign_op
-   a     r-val 
-   1     int   
-   ==    rel_op
-   m17   label 
-   JF    jf    
-   sw4   l-val 
-   166   int   
-   =     assign_op
-   m18   label 
-   JMP   jump  
-   m17   label 
-   :     colon 
-   m18   label 
-   :     colon 
-   a     r-val 
-   2     int   
-   ==    rel_op
-   m19   label 
-   JF    jf    
-   sw4   l-val 
-   266   int   
-   =     assign_op
-   m20   label 
-   JMP   jump  
-   m19   label 
-   :     colon 
-   m20   label 
-   :     colon 
-   a     r-val 
    3     int   
-   ==    rel_op
-   m21   label 
-   JF    jf    
-   sw4   l-val 
-   366   int   
+   -     add_op
+   4     int   
+   2     int   
+   +     add_op
+   +     add_op
    =     assign_op
-   m22   label 
-   JMP   jump  
-   m21   label 
-   :     colon 
-   m22   label 
-   :     colon 
 )

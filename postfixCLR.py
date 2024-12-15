@@ -31,8 +31,13 @@ def postfixCLR_codeGen(case,toTran):
         postfixCodeCLR.append(tl + 'add')
     elif case == '-':
         postfixCodeCLR.append(tl + 'sub')
+
     elif case == '**':
-        postfixCodeCLR.append(tl + 'pow')
+        values=""
+        values += tl + 'call float64 [mscorlib]System.Math::Pow(float64, float64)\n'  # Вызываем Pow
+        values += tl + 'conv.r4\n'
+        postfixCodeCLR.append(values)
+
     elif case == '*':
         postfixCodeCLR.append(tl + 'mul')
     elif case == '/':
@@ -93,14 +98,22 @@ def postfixCLR_codeGen(case,toTran):
 
         postfixCodeCLR.append(values)
 
-
     elif case == 'input':
-        lex = toTran
-        postfixCodeCLR.append(tl + ' call string [mscorlib] System.Console::ReadLine()')
-
-        postfixCodeCLR.append(tl + 'call int32 [mscorlib]System.Convert::ToInt32(string)')
-
-        postfixCodeCLR.append("\t" + "stloc  " + lex + "\n")
+        values = ""
+        lex, Type = toTran
+        if Type == 'int':
+            values += "\t" + 'ldstr "' + lex + ' -> "\n'
+            values += tl + ' call void [mscorlib]System.Console::Write(string)\n'
+            values+= tl + ' call string [mscorlib]System.Console::ReadLine()\n'
+            values+=tl + ' call int32 [mscorlib]System.Convert::ToInt32(string)\n'
+            values += tl + ' stloc ' + lex + '\n'
+        else:
+            values += "\t" + 'ldstr "' + lex + ' -> "\n'
+            values += tl + ' call void [mscorlib]System.Console::Write(string)\n'
+            values += tl + ' call string [mscorlib]System.Console::ReadLine()\n'
+            values += tl + ' call float32 [mscorlib]System.Convert::ToSingle(string)\n'
+            values += tl + ' stloc ' + lex + '\n'
+        postfixCodeCLR.append(values)
 
     return True
 
