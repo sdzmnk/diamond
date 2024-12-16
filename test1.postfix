@@ -13,31 +13,177 @@
    i2    float      
    i3    int        
    sw1   int        
-   sw2   int        
+   sw2   float      
    sw3   int        
    sw4   int        
    a     int        
    exp1  float      
    exp2  int        
-   exp3  type_error 
+   exp3  float      
    test  int        
    inp1  int        
    inp2  float      
 )
 
 .labels(
+   m1    32 
+   m2    18 
+   m3    70 
+   m4    87 
+   m5    49 
+   m6    66 
+   m7    61 
+   m8    82 
+   m9    98 
+   m10   89 
+   m11  107 
+   m12  188 
+   m13  146 
+   m14  179 
+   m15  163 
+   m16 val_undef 
+   m17 val_undef 
+   m18 val_undef 
+   m19  203 
+   m20  205 
+   m21  217 
+   m22  219 
+   m23  231 
+   m24  233 
+   m25 val_undef 
+   m26 val_undef 
 )
 
 .constants(
-11    int        
-1     int        
-3     int        
+0     int        
 2     int        
-10    int        
+3     int        
+5     int        
+1     int        
+11    int        
+22    int        
+33    int        
 4     int        
+10    int        
+3.6   float      
+9     int        
+6     int        
+8     int        
+166   int        
+266   int        
+366   int        
 )
 
 .code(
+   w     l-val 
+   0     int   
+   =     assign_op
+   b     l-val 
+   2     int   
+   =     assign_op
+   c     l-val 
+   3     int   
+   =     assign_op
+   k     l-val 
+   0     int   
+   =     assign_op
+   v     l-val 
+   0     int   
+   =     assign_op
+   u     l-val 
+   0     int   
+   =     assign_op
+   m2    label 
+   :     colon 
+   w     r-val 
+   5     int   
+   <     rel_op
+   m1    label 
+   JF    jf    
+   w     l-val 
+   w     r-val 
+   1     int   
+   +     add_op
+   =     assign_op
+   m2    label 
+   JMP   jump  
+   m1    label 
+   :     colon 
+   b     r-val 
+   1     int   
+   ==    rel_op
+   m3    label 
+   JF    jf    
+   c     r-val 
+   1     int   
+   ==    rel_op
+   m5    label 
+   JF    jf    
+   k     l-val 
+   11    int   
+   =     assign_op
+   m6    label 
+   JMP   jump  
+   m5    label 
+   :     colon 
+   c     r-val 
+   2     int   
+   ==    rel_op
+   m7    label 
+   JF    jf    
+   k     l-val 
+   22    int   
+   =     assign_op
+   m6    label 
+   JMP   jump  
+   m7    label 
+   :     colon 
+   k     l-val 
+   33    int   
+   =     assign_op
+   m6    label 
+   :     colon 
+   m4    label 
+   JMP   jump  
+   m3    label 
+   :     colon 
+   b     r-val 
+   3     int   
+   ==    rel_op
+   m8    label 
+   JF    jf    
+   v     l-val 
+   2     int   
+   =     assign_op
+   m4    label 
+   JMP   jump  
+   m8    label 
+   :     colon 
+   v     l-val 
+   4     int   
+   =     assign_op
+   m4    label 
+   :     colon 
+   m10   label 
+   :     colon 
+   u     r-val 
+   10    int   
+   ==    rel_op
+   m9    label 
+   JF    jf    
+   m11   label 
+   JMP   jump  
+   m9    label 
+   :     colon 
+   u     l-val 
+   u     r-val 
+   2     int   
+   +     add_op
+   =     assign_op
+   m10   label 
+   JMP   jump  
+   m11   label 
+   :     colon 
    exp2  l-val 
    11    int   
    =     assign_op
@@ -48,13 +194,129 @@
    2     int   
    -     add_op
    =     assign_op
-   exp3  l-val 
-   10    int   
-   3     int   
-   -     add_op
-   4     int   
+   i1    l-val 
+   1     int   
+   =     assign_op
+   i2    l-val 
+   3.6   float 
+   =     assign_op
+   i3    l-val 
+   9     int   
+   =     assign_op
+   sw1   l-val 
    2     int   
-   +     add_op
+   NEG   neg_op
+   =     assign_op
+   sw2   l-val 
+   2     int   
+   3     int   
+   **    pow_op
+   =     assign_op
+   sw3   l-val 
+   6     int   
+   =     assign_op
+   sw4   l-val 
+   0     int   
+   =     assign_op
+   sw1   l-val 
+   6     int   
+   =     assign_op
+   m13   label 
+   :     colon 
+   10    int   
+   sw1   r-val 
+   >=    rel_op
+   m12   label 
+   JF    jf    
+   sw4   l-val 
+   sw4   r-val 
+   1     int   
    +     add_op
    =     assign_op
+   sw4   r-val 
+   OUT   out_op
+   sw3   l-val 
+   6     int   
+   =     assign_op
+   m15   label 
+   :     colon 
+   8     int   
+   sw3   r-val 
+   >=    rel_op
+   m14   label 
+   JF    jf    
+   sw3   r-val 
+   OUT   out_op
+   sw3   l-val 
+   sw3   r-val 
+   1     int   
+   +     add_op
+   =     int   
+   m15   label 
+   JMP   jump  
+   m14   label 
+   :     colon 
+   sw1   l-val 
+   sw1   r-val 
+   1     int   
+   +     add_op
+   =     int   
+   m13   label 
+   JMP   jump  
+   m12   label 
+   :     colon 
+   a     l-val 
+   2     int   
+   =     assign_op
+   a     r-val 
+   1     int   
+   ==    rel_op
+   m19   label 
+   JF    jf    
+   sw4   l-val 
+   166   int   
+   =     assign_op
+   m20   label 
+   JMP   jump  
+   m19   label 
+   :     colon 
+   m20   label 
+   :     colon 
+   a     r-val 
+   2     int   
+   ==    rel_op
+   m21   label 
+   JF    jf    
+   sw4   l-val 
+   266   int   
+   =     assign_op
+   m22   label 
+   JMP   jump  
+   m21   label 
+   :     colon 
+   m22   label 
+   :     colon 
+   a     r-val 
+   3     int   
+   ==    rel_op
+   m23   label 
+   JF    jf    
+   sw4   l-val 
+   366   int   
+   =     assign_op
+   m24   label 
+   JMP   jump  
+   m23   label 
+   :     colon 
+   m24   label 
+   :     colon 
+   exp1  l-val 
+   2     int   
+   3     int   
+   2     int   
+   **    pow_op
+   **    pow_op
+   =     assign_op
+   a     r-val 
+   OUT   out_op
 )

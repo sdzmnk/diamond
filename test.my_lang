@@ -22,10 +22,71 @@ inp2 ^ float
 
 begin
 
+w=0
+b=2
+c=3
+k=0
+v=0
+u=0
+
+while w < 5 do
+  w = w + 1
+end
+
+if b==1
+    if c==1
+        k=11
+    elif c==2
+        k=22
+    else
+        k=33
+    end
+elif b==3
+    v=2
+else
+  v=4
+end
+
+until u == 10 do
+  u = u + 2
+end
+
 exp2 = 11
 
 exp2 = 1+3-2
-exp3 = (10 - 3) + (4 + 2)
+
+i1, i2, i3 = 1, 3.6, 9
+
+sw1 = -2
+
+sw2 = 2**3
+
+sw3 = 6
+sw4 = 0
+
+
+for sw1 in [6 .. 10] do
+  sw4 = sw4 + 1
+  puts "sw4"
+    for sw3 in [6 .. 8] do
+        puts "sw3"
+    end
+end
+
+a = 2
+
+switch a
+do
+    case 1:
+        sw4 = 166
+    case 2:
+        sw4 = 266
+    case 3:
+        sw4 = 366
+end
+
+exp1 = 2**3**2
+
+puts "a"
 
 finish
-

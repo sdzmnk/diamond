@@ -96,7 +96,7 @@ def postfixCLR_codeGen(case,toTran):
         values += "\tldstr \"" + lex + "\"\n"
         values += "\tcall void [mscorlib]System.Console::Write(string) \n"
 
-        postfixCodeCLR.append(values)
+        postfixCodeCLR.append(values + "\n")
 
     elif case == 'input':
         values = ""
